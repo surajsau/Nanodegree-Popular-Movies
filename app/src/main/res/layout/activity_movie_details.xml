@@ -20,7 +20,14 @@
             android:layout_height="match_parent"
             android:fitsSystemWindows="true"
             app:contentScrim="?attr/colorPrimary"
-            app:layout_scrollFlags="scroll|exitUntilCollapsed">
+            app:layout_scrollFlags="scroll|enterAlways">
+
+            <ImageView android:id="@+id/ivMovieBackdrop"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="center"
+                app:layout_collapseMode="parallax"
+                android:fitsSystemWindows="true"/>
 
             <android.support.v7.widget.Toolbar
                 android:id="@+id/toolbar"
@@ -35,7 +42,7 @@
     <include layout="@layout/content_movie_details" />
 
     <android.support.design.widget.FloatingActionButton
-        android:id="@+id/fab"
+        android:id="@+id/btnShare"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/fab_margin"

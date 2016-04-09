@@ -14,7 +14,7 @@ public class MovieDetailsResponse {
     private List<Genre> genres;
     private String homepage;
     private int id;
-    private int imdb_id;
+    private String imdb_id;
     private String original_language;
     private String original_title;
     private String overview;
@@ -115,14 +115,14 @@ public class MovieDetailsResponse {
     }
 
     public static class ProductionCountry {
-        private int iso_3166_1;
+        private String iso_3166_1;
         private String name;
 
-        public int getIso_3166_1() {
+        public String getIso_3166_1() {
             return iso_3166_1;
         }
 
-        public void setIso_3166_1(int iso_3166_1) {
+        public void setIso_3166_1(String iso_3166_1) {
             this.iso_3166_1 = iso_3166_1;
         }
 
@@ -136,14 +136,14 @@ public class MovieDetailsResponse {
     }
 
     public static class SpokenLanguage {
-        private int iso_639_1;
+        private String iso_639_1;
         private String name;
 
-        public int getIso_639_1() {
+        public String getIso_639_1() {
             return iso_639_1;
         }
 
-        public void setIso_639_1(int iso_639_1) {
+        public void setIso_639_1(String iso_639_1) {
             this.iso_639_1 = iso_639_1;
         }
 
@@ -212,11 +212,11 @@ public class MovieDetailsResponse {
         this.id = id;
     }
 
-    public int getImdb_id() {
+    public String getImdb_id() {
         return imdb_id;
     }
 
-    public void setImdb_id(int imdb_id) {
+    public void setImdb_id(String imdb_id) {
         this.imdb_id = imdb_id;
     }
 

@@ -18,6 +18,7 @@ import in.surajsau.popularmovies.network.PopularMoviesClient;
 import in.surajsau.popularmovies.network.ServiceGenerator;
 import in.surajsau.popularmovies.network.models.PopularMoviesResponse;
 import rx.Observable;
+import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Func1;
 import rx.schedulers.Schedulers;
@@ -27,6 +28,8 @@ public class MainActivity extends AppCompatActivity {
     private static final String TAG = MainActivity.class.getSimpleName();
 
     private PopularMoviesClient client;
+    private Subscription movieListSubscription;
+    private Subscription movieDataBindingSubscription;
 
     @Bind(R.id.rlMovieList) RecyclerView rlMovieList;
 
@@ -48,14 +51,14 @@ public class MainActivity extends AppCompatActivity {
     private void callPopularMoviesAPI() {
         Observable<PopularMoviesResponse> popularMoviesResponse = client.getPopularMovies();
 
-        popularMoviesResponse.subscribeOn(Schedulers.newThread())
+        movieListSubscription = popularMoviesResponse.subscribeOn(Schedulers.newThread())
                             .observeOn(AndroidSchedulers.mainThread())
                             .subscribe(new PopularMoviesResponseSubcriber());
     }
 
     private void populatePopularMoviesList(List<PopularMoviesResponse.Movie> movies) {
 
-        Observable.just(movies)
+        movieDataBindingSubscription = Observable.just(movies)
                 .flatMap(new Func1<List<PopularMoviesResponse.Movie>, Observable<PopularMoviesResponse.Movie>>() {
                     @Override
                     public Observable<PopularMoviesResponse.Movie> call(List<PopularMoviesResponse.Movie> movies) {
@@ -94,5 +97,12 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onPause() {
         super.onPause();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        movieListSubscription.unsubscribe();
+        movieDataBindingSubscription.unsubscribe();
     }
 }
