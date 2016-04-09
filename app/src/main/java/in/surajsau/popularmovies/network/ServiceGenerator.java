@@ -31,6 +31,7 @@ public class ServiceGenerator {
                                                             .addInterceptor(apiKeyInterceptor);
 
     private static Retrofit.Builder builder = new Retrofit.Builder()
+                                                    .baseUrl(IConstants.BASE_URL)
                                                     .addConverterFactory(JacksonConverterFactory.create())
                                                     .addCallAdapterFactory(RxJavaCallAdapterFactory.create());
 

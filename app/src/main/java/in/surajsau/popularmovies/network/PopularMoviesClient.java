@@ -12,9 +12,9 @@ import rx.Observable;
  */
 public interface PopularMoviesClient {
 
-    @GET("/movie/popular")
+    @GET("movie/popular")
     Observable<PopularMoviesResponse> getPopularMovies();
 
-    @GET("/movie/{movieId}")
+    @GET("movie/{movieId}")
     Call<MovieDetailsResponse> getMovieDetails(@Path("movieId") String movieId);
 }

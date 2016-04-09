@@ -2,13 +2,17 @@ package in.surajsau.popularmovies.mainscreen.adapter;
 
 import android.content.Context;
 import android.content.Intent;
-import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.squareup.picasso.Picasso;
+
+import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.Bind;
@@ -16,6 +20,7 @@ import butterknife.ButterKnife;
 import in.surajsau.popularmovies.IConstants;
 import in.surajsau.popularmovies.R;
 import in.surajsau.popularmovies.details.activity.MovieDetailsActivity;
+import in.surajsau.popularmovies.mainscreen.utils.Util;
 import in.surajsau.popularmovies.network.models.PopularMoviesResponse;
 
 /**
@@ -26,9 +31,14 @@ public class PopularMoviesGridAdapter extends RecyclerView.Adapter<PopularMovies
     private List<PopularMoviesResponse.Movie> mMovies;
     private Context mContext;
 
-    private PopularMoviesGridAdapter(Context context, List<PopularMoviesResponse.Movie> movies) {
+    public PopularMoviesGridAdapter(Context context) {
         mContext = context;
-        mMovies = movies;
+        mMovies = new ArrayList<>();
+    }
+
+    public void addMovieToList(PopularMoviesResponse.Movie movie) {
+        mMovies.add(movie);
+        notifyDataSetChanged();
     }
 
     @Override
@@ -39,12 +49,15 @@ public class PopularMoviesGridAdapter extends RecyclerView.Adapter<PopularMovies
 
     @Override
     public void onBindViewHolder(PopularMoviesGridViewHolder holder, int position) {
-        if(mMovies.get(position) != null) {
+        if(mMovies != null && mMovies.get(position) != null) {
             PopularMoviesResponse.Movie movie = mMovies.get(position);
             holder.tvMovieName.setText(movie.getTitle());
+            Picasso.with(mContext)
+                    .load(Util.getPosterImageUrl(movie.getPoster_path()))
+                    .into(holder.ivMoviePoster);
             holder.tvMoviePopularity.setText(String.format("%.2f", movie.getPopularity()));
             holder.tvMovieRating.setText(String.format("%.2f", movie.getVote_average()));
-            holder.cvMovieGrid.setTag(movie);
+            holder.llMovieGrid.setTag(movie);
         }
     }
 
@@ -55,7 +68,8 @@ public class PopularMoviesGridAdapter extends RecyclerView.Adapter<PopularMovies
 
     public class PopularMoviesGridViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
 
-        @Bind(R.id.cvMovieGrid) CardView cvMovieGrid;
+        @Bind(R.id.llMovieGrid) LinearLayout llMovieGrid;
+        @Bind(R.id.ivMoviePoster) ImageView ivMoviePoster;
         @Bind(R.id.tvMovieName) TextView tvMovieName;
         @Bind(R.id.tvMovieRating) TextView tvMovieRating;
         @Bind(R.id.tvMoviePopularity) TextView tvMoviePopularity;
@@ -63,9 +77,9 @@ public class PopularMoviesGridAdapter extends RecyclerView.Adapter<PopularMovies
 
         public PopularMoviesGridViewHolder(View itemView) {
             super(itemView);
-            ButterKnife.bind(itemView);
+            ButterKnife.bind(this, itemView);
 
-            cvMovieGrid.setOnClickListener(this);
+            llMovieGrid.setOnClickListener(this);
         }
 
         @Override
