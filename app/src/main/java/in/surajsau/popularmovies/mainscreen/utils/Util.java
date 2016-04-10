@@ -12,4 +12,15 @@ public class Util {
     public static String getBackdropImageUrl(String backdropImagePath) {
         return "http://image.tmdb.org/t/p/w1280/" + backdropImagePath;
     }
+
+    public static String getValueOrNull(String str) {
+        if(null ==  str)
+            return "..";
+        else {
+            if(str.length() == 0)
+                return "..";
+            else
+                return str;
+        }
+    }
 }

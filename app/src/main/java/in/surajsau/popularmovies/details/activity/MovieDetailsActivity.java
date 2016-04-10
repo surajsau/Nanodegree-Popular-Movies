@@ -7,6 +7,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
 
@@ -33,6 +34,8 @@ public class MovieDetailsActivity extends AppCompatActivity implements View.OnCl
     @Bind(R.id.toolbar) Toolbar toolbar;
     @Bind(R.id.btnShare) FloatingActionButton btnShare;
     @Bind(R.id.ivMovieBackdrop) ImageView ivMovieBackdrop;
+    @Bind(R.id.ivMoviePoster) ImageView ivMoviePoster;
+    @Bind(R.id.tvMovieTitle) TextView tvMovieTitle;
 
     Subscription movieDetailsSubscription;
 
@@ -96,6 +99,12 @@ public class MovieDetailsActivity extends AppCompatActivity implements View.OnCl
             Picasso.with(MovieDetailsActivity.this)
                     .load(Util.getBackdropImageUrl(movieDetailsResponse.getBackdrop_path()))
                     .into(ivMovieBackdrop);
+
+            Picasso.with(MovieDetailsActivity.this)
+                    .load(Util.getPosterImageUrl(movieDetailsResponse.getPoster_path()))
+                    .into(ivMoviePoster);
+
+            tvMovieTitle.setText(Util.getValueOrNull(movieDetailsResponse.getTitle()));
         }
     }
 
