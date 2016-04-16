@@ -8,8 +8,7 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".mainscreen.activity.MainActivity"
-            android:screenOrientation="portrait">
+        <activity android:name=".mainscreen.activity.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -20,8 +19,7 @@
             android:name=".details.activity.MovieDetailsActivity"
             android:label="@string/title_activity_movie_details"
             android:parentActivityName=".mainscreen.activity.MainActivity"
-            android:theme="@style/AppTheme.NoActionBar"
-            android:screenOrientation="portrait">
+            android:theme="@style/AppTheme.NoActionBar">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="in.surajsau.popularmovies.mainscreen.activity.MainActivity" />
