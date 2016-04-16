@@ -15,6 +15,8 @@ import butterknife.Bind;
 import butterknife.ButterKnife;
 import in.surajsau.popularmovies.R;
 import in.surajsau.popularmovies.mainscreen.adapter.MoviesGridAdapter;
+import in.surajsau.popularmovies.mainscreen.presenter.MainScreenPresenter;
+import in.surajsau.popularmovies.mainscreen.presenter.MainScreenPresenterImpl;
 import in.surajsau.popularmovies.network.BaseSubscriber;
 import in.surajsau.popularmovies.network.PopularMoviesClient;
 import in.surajsau.popularmovies.network.ServiceGenerator;
@@ -26,16 +28,11 @@ import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements MainScreenView {
 
     private static final String TAG = MainActivity.class.getSimpleName();
 
-    private PopularMoviesClient client;
-    private Subscription movieListSubscription;
-    private Subscription movieDataBindingSubscription;
-
-    private static final int POPULARITY = 0;
-    private static final int RATING = 1;
+    private MainScreenPresenter presenter;
 
     @Bind(R.id.rlMovieList) RecyclerView rlMovieList;
     @Bind(R.id.progress) MaterialProgressBar progress;
@@ -48,44 +45,12 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
 
+        presenter = new MainScreenPresenterImpl(this);
+
         setupRecyclerView();
 
-        //--inititate and load list
-        client = ServiceGenerator.createService(PopularMoviesClient.class);
-        callPopularMoviesAPI();
-    }
-
-    private void callPopularMoviesAPI() {
-        showProgress();
-
-        Observable<PopularMoviesResponse> popularMoviesResponse = client.getPopularMovies();
-
-        movieListSubscription = popularMoviesResponse.subscribeOn(Schedulers.newThread())
-                            .observeOn(AndroidSchedulers.mainThread())
-                            .subscribe(new MoviesResponseSubcriber());
-    }
-
-    private void callTopRatedMoviesAPI() {
-        showProgress();
-
-        Observable<PopularMoviesResponse> topRatedMoviesResponse = client.getTopRatedMovies();
-
-        movieListSubscription = topRatedMoviesResponse.subscribeOn(Schedulers.newThread())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new MoviesResponseSubcriber());
-    }
-
-    private void populatePopularMoviesList(List<PopularMoviesResponse.Movie> movies) {
-
-        movieDataBindingSubscription = Observable.just(movies)
-                .flatMap(new Func1<List<PopularMoviesResponse.Movie>, Observable<PopularMoviesResponse.Movie>>() {
-                    @Override
-                    public Observable<PopularMoviesResponse.Movie> call(List<PopularMoviesResponse.Movie> movies) {
-                        return Observable.from(movies);
-                    }
-                })
-                .subscribe(new MovieItemSubscriber());
-
+        //--load popular list by default
+        presenter.callPopularMoviesAPI();
     }
 
     private void setupRecyclerView() {
@@ -94,38 +59,9 @@ public class MainActivity extends AppCompatActivity {
         rlMovieList.setAdapter(mAdapter);
     }
 
-    private class MoviesResponseSubcriber extends BaseSubscriber<PopularMoviesResponse> {
-
-        @Override
-        public void onNext(PopularMoviesResponse popularMoviesResponse) {
-            if(popularMoviesResponse != null && popularMoviesResponse.getResults() != null)
-                populatePopularMoviesList(popularMoviesResponse.getResults());
-        }
-
-        @Override
-        public String getSubscriberName() {
-            return "Popular movies";
-        }
-
-        @Override
-        public void onCompleted() {
-            super.onCompleted();
-            hideProgress();
-        }
-    }
-
-    private class MovieItemSubscriber extends BaseSubscriber<PopularMoviesResponse.Movie> {
-
-        @Override
-        public void onNext(PopularMoviesResponse.Movie movie) {
-            if(movie != null)
-                mAdapter.addMovieToList(movie);
-        }
-
-        @Override
-        public String getSubscriberName() {
-            return "Movie Item";
-        }
+    @Override
+    public MoviesGridAdapter getMovieGridAdapter() {
+        return mAdapter;
     }
 
     @Override
@@ -139,14 +75,12 @@ public class MainActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.menu_popularity: {
-                mAdapter.clearMoviesList();
-                callPopularMoviesAPI();
+                presenter.onPopularMenuSelected();
                 return true;
             }
 
             case R.id.menu_ratings: {
-                mAdapter.clearMoviesList();
-                callTopRatedMoviesAPI();
+                presenter.onRatingsMenuSelected();
                 return true;
             }
         }
@@ -155,17 +89,18 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
+        presenter.onDestroy();
         super.onDestroy();
-        movieListSubscription.unsubscribe();
-        movieDataBindingSubscription.unsubscribe();
     }
 
-    private void showProgress() {
+    @Override
+    public void showProgress() {
         if(progress.getVisibility() == View.GONE)
             progress.setVisibility(View.VISIBLE);
     }
 
-    private void hideProgress() {
+    @Override
+    public void hideProgress() {
         if(progress.getVisibility() == View.VISIBLE)
             progress.setVisibility(View.GONE);
     }

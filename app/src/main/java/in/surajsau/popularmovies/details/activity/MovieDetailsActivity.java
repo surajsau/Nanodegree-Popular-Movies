@@ -1,5 +1,6 @@
 package in.surajsau.popularmovies.details.activity;
 
+import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -26,6 +27,8 @@ import in.surajsau.popularmovies.IConstants;
 import in.surajsau.popularmovies.R;
 import in.surajsau.popularmovies.details.adapter.MovieImagesAdapter;
 import in.surajsau.popularmovies.Util;
+import in.surajsau.popularmovies.details.presenter.MovieDetailsPresenter;
+import in.surajsau.popularmovies.details.presenter.MovieDetailsPresenterImpl;
 import in.surajsau.popularmovies.network.BaseSubscriber;
 import in.surajsau.popularmovies.network.PopularMoviesClient;
 import in.surajsau.popularmovies.network.ServiceGenerator;
@@ -38,11 +41,11 @@ import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 
-public class MovieDetailsActivity extends AppCompatActivity implements View.OnClickListener{
+public class MovieDetailsActivity extends AppCompatActivity implements View.OnClickListener, MovieDetailsView{
 
     private static final String TAG = MovieDetailsActivity.class.getSimpleName();
 
-    private PopularMoviesClient client;
+    private MovieDetailsPresenter presenter;
 
     @Bind(R.id.toolbar) Toolbar toolbar;
     @Bind(R.id.cvMovieDetails) CardView cvMovieDetails;
@@ -57,30 +60,27 @@ public class MovieDetailsActivity extends AppCompatActivity implements View.OnCl
     @Bind(R.id.progress) MaterialProgressBar progress;
 //    @Bind(R.id.rlMovieBackdrops) RecyclerView rlMovieBackdrops;
 
-    private Subscription movieDetailsSubscription;
-    private Subscription moviePosterSubscription;
-
     private MovieImagesAdapter mPosterAdapter;
 //    private MovieImagesAdapter mBackdropAdapter;
 
     private String mMovieTitle;
     private int mMovieId;
-    private String imdbUrl;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_movie_details);
         ButterKnife.bind(this);
-
         getDataFromBundle();
+
+        presenter = new MovieDetailsPresenterImpl(this, mMovieId);
+
         setupToolbar();
         setOnClickListeners();
 
         setupGallery();
 
-        client = ServiceGenerator.createService(PopularMoviesClient.class);
-        callMovieDetailsAPI();
+        presenter.callMovieDetailsAPI();
 
     }
 
@@ -119,145 +119,51 @@ public class MovieDetailsActivity extends AppCompatActivity implements View.OnCl
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.btnImdbLink: {
-                openImdbLink();
+                presenter.openImdbLink();
             }
             break;
         }
     }
 
-    private void callMovieDetailsAPI() {
-        showProgress();
-
-        Observable<MovieDetailsResponse> movieDetailsResponse = client.getMovieDetails(mMovieId);
-
-        movieDetailsSubscription = movieDetailsResponse.subscribeOn(Schedulers.newThread())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new MovieDetailsSubscriber());
+    @Override
+    public MovieImagesAdapter getMoviePosterAdapter() {
+        return mPosterAdapter;
     }
-
-    private void callMovieImagesAPI() {
-        Observable<MovieImagesResponse> movieImagesResponse = client.getMovieImages(mMovieId);
-
-        moviePosterSubscription = movieImagesResponse.subscribeOn(Schedulers.newThread())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new MovieImageResponseSubscriber());
-
-    }
-
-    private class MovieDetailsSubscriber extends BaseSubscriber<MovieDetailsResponse> {
-
-        @Override
-        public void onNext(MovieDetailsResponse movieDetailsResponse) {
-            Picasso.with(MovieDetailsActivity.this)
-                    .load(Util.getBackdropImageUrl(movieDetailsResponse.getBackdrop_path()))
-                    .into(ivMovieBackdrop);
-
-            Picasso.with(MovieDetailsActivity.this)
-                    .load(Util.getPosterImageUrlForDetails(movieDetailsResponse.getPoster_path()))
-                    .into(ivMoviePoster);
-
-            tvReleaseDate.setText(movieDetailsResponse.getRelease_date());
-            tvVoteAverage.setText(movieDetailsResponse.getVote_average() + "");
-            tvMovieSummary.setText(movieDetailsResponse.getOverview());
-
-            imdbUrl = movieDetailsResponse.getImdb_id();
-        }
-
-        @Override
-        public String getSubscriberName() {
-            return "Movie Details";
-        }
-
-        @Override
-        public void onCompleted() {
-            super.onCompleted();
-
-            //--show the cards
-            hideProgress();
-            cvMovieDetails.setVisibility(View.VISIBLE);
-            llMovieDetails.setVisibility(View.VISIBLE);
-
-            callMovieImagesAPI();
-        }
-    }
-
-    private class MovieImageResponseSubscriber extends BaseSubscriber<MovieImagesResponse> {
-
-        @Override
-        public String getSubscriberName() {
-            return "Movie Image response";
-        }
-
-        @Override
-        public void onNext(MovieImagesResponse movieImagesResponse) {
-            Observable.just(movieImagesResponse.getPosters())
-                .flatMap(new Func1<List<MovieImagesResponse.Poster>, Observable<MovieImagesResponse.Poster>>() {
-                    @Override
-                    public Observable<MovieImagesResponse.Poster> call(List<MovieImagesResponse.Poster> posters) {
-                        return Observable.from(posters);
-                    }
-                })
-                .map(new Func1<MovieImagesResponse.Poster, String>() {
-                    @Override
-                    public String call(MovieImagesResponse.Poster poster) {
-                        if(poster != null)
-                            return poster.getFile_path();
-                        return null;
-                    }
-                })
-                .subscribe(new MoviePostersSubscriber());
-
-//            Observable.just(movieImagesResponse.getBackdrops())
-//                    .flatMap(new Func1<List<MovieImagesResponse.Backdrop>, Observable<MovieImagesResponse.Backdrop>>() {
-//                        @Override
-//                        public Observable<MovieImagesResponse.Backdrop> call(List<MovieImagesResponse.Backdrop> backdrops) {
-//                            return Observable.from(backdrops);
-//                        }
-//                    })
-//                    .map(new Func1<MovieImagesResponse.Backdrop, String>() {
-//                        @Override
-//                        public String call(MovieImagesResponse.Backdrop backdrop) {
-//                            if(backdrop != null)
-//                                return backdrop.getFile_path();
-//                            return null;
-//                        }
-//                    })
-//                    .subscribe(new MovieBackdropSubscriber());
-        }
-    }
-
-    private class MoviePostersSubscriber extends BaseSubscriber<String> {
-        @Override
-        public void onNext(String movieUrl) {
-            mPosterAdapter.addMoviePosterUrl(movieUrl);
-        }
-
-        @Override
-        public String getSubscriberName() {
-            return "Movie Posters";
-        }
-    }
-
-//    private class MovieBackdropSubscriber extends BaseSubscriber<String> {
-//        @Override
-//        public void onNext(String movieUrl) {
-//            mBackdropAdapter.addMoviePosterUrl(movieUrl);
-//        }
-//
-//        @Override
-//        public String getSubscriberName() {
-//            return "Movie Backdrop";
-//        }
-//    }
 
     @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        movieDetailsSubscription.unsubscribe();
-        moviePosterSubscription.unsubscribe();
+    public Context getContext() {
+        return MovieDetailsActivity.this;
     }
 
-    private void openImdbLink() {
+    @Override
+    public void loadMoviePosterImage(String posterUrl) {
+        Picasso.with(MovieDetailsActivity.this)
+                .load(Util.getPosterImageUrlForDetails(posterUrl))
+                .into(ivMoviePoster);
+    }
+
+    @Override
+    public void loadMovieBackdropImage(String backdropUrl) {
+        Picasso.with(MovieDetailsActivity.this)
+                .load(Util.getBackdropImageUrl(backdropUrl))
+                .into(ivMovieBackdrop);
+    }
+
+    @Override
+    public void populateDataFromResponse(MovieDetailsResponse res) {
+        tvReleaseDate.setText(res.getRelease_date());
+        tvVoteAverage.setText(res.getVote_average() + "");
+        tvMovieSummary.setText(res.getOverview());
+    }
+
+    @Override
+    public void onMovieDetailsResponseComplete() {
+        cvMovieDetails.setVisibility(View.VISIBLE);
+        llMovieDetails.setVisibility(View.VISIBLE);
+    }
+
+    @Override
+    public void openImdb(String imdbUrl) {
         if(!TextUtils.isEmpty(imdbUrl)) {
             try {
                 startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("imdb:///title/" + imdbUrl)));
@@ -269,14 +175,24 @@ public class MovieDetailsActivity extends AppCompatActivity implements View.OnCl
         }
     }
 
-    private void showProgress() {
+    @Override
+    public void showProgress() {
         if(progress.getVisibility() == View.GONE)
             progress.setVisibility(View.VISIBLE);
     }
 
-    private void hideProgress() {
+    @Override
+    public void hideProgress() {
         if(progress.getVisibility() == View.VISIBLE)
             progress.setVisibility(View.GONE);
     }
+
+    @Override
+    protected void onDestroy() {
+        presenter.onDestroy();
+        super.onDestroy();
+    }
+
+
 
 }
