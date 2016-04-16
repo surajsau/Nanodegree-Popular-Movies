@@ -29,14 +29,16 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
 
-                <TextView android:text="Synposis"
+                <android.support.v7.widget.AppCompatTextView
+                    android:text="Synposis"
                     style="@style/headerText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="@dimen/text_margin"
                     android:layout_marginTop="@dimen/text_margin"/>
 
-                <TextView android:id="@+id/tvMovieSummary"
+                <android.support.v7.widget.AppCompatTextView
+                    android:id="@+id/tvMovieSummary"
                     style="@style/contentText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -58,7 +60,8 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
 
-                <TextView android:text="Posters"
+                <android.support.v7.widget.AppCompatTextView
+                    android:text="Posters"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:paddingLeft="@dimen/common_horizontal_padding"
@@ -75,7 +78,7 @@
                     android:paddingBottom="@dimen/common_vertical_padding"
                     android:clipToPadding="false"/>
 
-                <!--<TextView android:text="Posters"-->
+                <!--<android.support.v7.widget.AppCompatTextView android:text="Posters"-->
                     <!--android:layout_width="wrap_content"-->
                     <!--android:layout_height="wrap_content" />-->
 

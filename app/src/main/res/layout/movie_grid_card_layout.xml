@@ -14,13 +14,15 @@
         android:padding="5dp"
         android:id="@+id/llMovieGrid">
 
-        <ImageView android:id="@+id/ivMoviePoster"
+        <android.support.v7.widget.AppCompatImageView
+            android:id="@+id/ivMoviePoster"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="11"
             android:scaleType="centerCrop"/>
 
-        <TextView android:id="@+id/tvMovieName"
+        <android.support.v7.widget.AppCompatTextView
+            android:id="@+id/tvMovieName"
             android:layout_width="wrap_content"
             android:layout_height="0dp"
             android:layout_weight="2"
@@ -42,7 +44,8 @@
                 android:src="@drawable/popularity"
                 android:scaleType="fitCenter"/>
 
-            <TextView android:id="@+id/tvMoviePopularity"
+            <android.support.v7.widget.AppCompatTextView
+                android:id="@+id/tvMoviePopularity"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text=""
@@ -64,7 +67,8 @@
                 android:src="@drawable/rating"
                 android:scaleType="fitCenter"/>
 
-            <TextView android:id="@+id/tvMovieRating"
+            <android.support.v7.widget.AppCompatTextView
+                android:id="@+id/tvMovieRating"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text=""

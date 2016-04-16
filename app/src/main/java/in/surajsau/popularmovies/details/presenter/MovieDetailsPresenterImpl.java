@@ -38,8 +38,11 @@ public class MovieDetailsPresenterImpl implements MovieDetailsPresenter {
 
     @Override
     public void onDestroy() {
-        movieDetailsSubscription.unsubscribe();
-        moviePosterSubscription.unsubscribe();
+        if(movieDetailsSubscription != null && !movieDetailsSubscription.isUnsubscribed())
+            movieDetailsSubscription.unsubscribe();
+
+        if(moviePosterSubscription != null && !moviePosterSubscription.isUnsubscribed())
+            moviePosterSubscription.unsubscribe();
     }
 
     @Override

@@ -1,6 +1,7 @@
 package in.surajsau.popularmovies.details.adapter;
 
 import android.content.Context;
+import android.support.v7.widget.AppCompatImageView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -59,11 +60,11 @@ public class MovieImagesAdapter extends RecyclerView.Adapter<MovieImagesAdapter.
     }
 
     public class MovieImagesViewHolder extends RecyclerView.ViewHolder {
-        @Bind(R.id.ivGalleryMoviePoster) ImageView ivGalleryMoviePoster;
+        @Bind(R.id.ivGalleryMoviePoster) AppCompatImageView ivGalleryMoviePoster;
 
         public MovieImagesViewHolder(View itemView) {
             super(itemView);
-            ButterKnife.bind(this, itemView);
+            ButterKnife.bind(MovieImagesViewHolder.this, itemView);
         }
     }
 }

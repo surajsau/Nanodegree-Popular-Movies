@@ -42,7 +42,7 @@ public class MainScreenPresenterImpl implements MainScreenPresenter {
 
     @Override
     public void callTopRatedMoviesAPI() {
-        mView.hideProgress();
+        mView.showProgress();
 
         Observable<PopularMoviesResponse> topRatedMoviesResponse = client.getTopRatedMovies();
 
@@ -100,8 +100,11 @@ public class MainScreenPresenterImpl implements MainScreenPresenter {
 
     @Override
     public void onDestroy() {
-        movieListSubscription.unsubscribe();
-        movieDataBindingSubscription.unsubscribe();
+        if(movieListSubscription != null && !movieListSubscription.isUnsubscribed())
+            movieListSubscription.unsubscribe();
+
+        if(movieDataBindingSubscription != null && !movieDataBindingSubscription.isUnsubscribed())
+            movieDataBindingSubscription.unsubscribe();
     }
 
     @Override

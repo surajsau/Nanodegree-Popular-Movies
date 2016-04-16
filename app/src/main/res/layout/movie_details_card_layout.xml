@@ -21,7 +21,8 @@
         android:paddingRight="@dimen/common_horizontal_padding"
         android:paddingBottom="5dp">
 
-        <ImageView android:id="@+id/ivMoviePoster"
+        <android.support.v7.widget.AppCompatImageView
+            android:id="@+id/ivMoviePoster"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:elevation="3dp"
@@ -39,12 +40,12 @@
                 android:orientation="horizontal"
                 android:layout_gravity="center_vertical">
 
-                <ImageView
+                <android.support.v7.widget.AppCompatImageView
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
                     android:src="@drawable/release_date"/>
 
-                <TextView android:id="@+id/tvReleaseDate"
+                <android.support.v7.widget.AppCompatTextView android:id="@+id/tvReleaseDate"
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
                     android:text="--"
@@ -61,12 +62,13 @@
                 android:orientation="horizontal"
                 android:layout_gravity="center_vertical">
 
-                <ImageView
+                <android.support.v7.widget.AppCompatImageView
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
                     android:src="@drawable/rating"/>
 
-                <TextView android:id="@+id/tvVoteAverage"
+                <android.support.v7.widget.AppCompatTextView
+                    android:id="@+id/tvVoteAverage"
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
                     android:textSize="30sp"
@@ -78,7 +80,8 @@
 
             </LinearLayout>
 
-            <Button android:id="@+id/btnImdbLink"
+            <android.support.v7.widget.AppCompatButton
+                android:id="@+id/btnImdbLink"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="1"

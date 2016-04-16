@@ -5,11 +5,14 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.AppCompatImageView;
+import android.support.v7.widget.AppCompatTextView;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
+import android.view.Menu;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -40,10 +43,10 @@ public class MovieDetailsActivity extends AppCompatActivity implements View.OnCl
     @Bind(R.id.cvMovieDetails) CardView cvMovieDetails;
     @Bind(R.id.llMovieDetails) LinearLayout llMovieDetails;
     @Bind(R.id.ivMovieBackdrop) ImageView ivMovieBackdrop;
-    @Bind(R.id.ivMoviePoster) ImageView ivMoviePoster;
-    @Bind(R.id.tvReleaseDate) TextView tvReleaseDate;
-    @Bind(R.id.tvVoteAverage) TextView tvVoteAverage;
-    @Bind(R.id.tvMovieSummary) TextView tvMovieSummary;
+    @Bind(R.id.ivMoviePoster) AppCompatImageView ivMoviePoster;
+    @Bind(R.id.tvReleaseDate) AppCompatTextView tvReleaseDate;
+    @Bind(R.id.tvVoteAverage) AppCompatTextView tvVoteAverage;
+    @Bind(R.id.tvMovieSummary) AppCompatTextView tvMovieSummary;
     @Bind(R.id.btnImdbLink) Button btnImdbLink;
     @Bind(R.id.rlMoviePosters) RecyclerView rlMoviePosters;
     @Bind(R.id.progress) MaterialProgressBar progress;
@@ -59,7 +62,7 @@ public class MovieDetailsActivity extends AppCompatActivity implements View.OnCl
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_movie_details);
-        ButterKnife.bind(this);
+        ButterKnife.bind(MovieDetailsActivity.this);
         getDataFromBundle();
 
         presenter = new MovieDetailsPresenterImpl(this, mMovieId);
@@ -176,7 +179,5 @@ public class MovieDetailsActivity extends AppCompatActivity implements View.OnCl
         presenter.onDestroy();
         super.onDestroy();
     }
-
-
 
 }

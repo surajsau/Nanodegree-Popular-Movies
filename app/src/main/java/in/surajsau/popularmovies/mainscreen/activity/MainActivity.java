@@ -32,7 +32,7 @@ public class MainActivity extends AppCompatActivity implements MainScreenView {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        ButterKnife.bind(this);
+        ButterKnife.bind(MainActivity.this);
 
         setupRecyclerView();
 
@@ -40,6 +40,12 @@ public class MainActivity extends AppCompatActivity implements MainScreenView {
 
         //--load popular list by default
         presenter.callPopularMoviesAPI();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
     }
 
     private void setupRecyclerView() {
@@ -65,13 +71,13 @@ public class MainActivity extends AppCompatActivity implements MainScreenView {
         switch (item.getItemId()) {
             case R.id.menu_popularity: {
                 presenter.onPopularMenuSelected();
-                return true;
             }
+            break;
 
             case R.id.menu_ratings: {
                 presenter.onRatingsMenuSelected();
-                return true;
             }
+            break;
         }
         return super.onOptionsItemSelected(item);
     }

@@ -2,6 +2,8 @@ package in.surajsau.popularmovies.mainscreen.adapter;
 
 import android.content.Context;
 import android.content.Intent;
+import android.support.v7.widget.AppCompatImageView;
+import android.support.v7.widget.AppCompatTextView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -74,15 +76,19 @@ public class MoviesGridAdapter extends RecyclerView.Adapter<MoviesGridAdapter.Po
     public class PopularMoviesGridViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
 
         @Bind(R.id.llMovieGrid) LinearLayout llMovieGrid;
-        @Bind(R.id.ivMoviePoster) ImageView ivMoviePoster;
-        @Bind(R.id.tvMovieName) TextView tvMovieName;
-        @Bind(R.id.tvMovieRating) TextView tvMovieRating;
-        @Bind(R.id.tvMoviePopularity) TextView tvMoviePopularity;
+        @Bind(R.id.ivMoviePoster) AppCompatImageView ivMoviePoster;
+        @Bind(R.id.tvMovieName) AppCompatTextView tvMovieName;
+        @Bind(R.id.tvMovieRating) AppCompatTextView tvMovieRating;
+        @Bind(R.id.tvMoviePopularity) AppCompatTextView tvMoviePopularity;
 
 
         public PopularMoviesGridViewHolder(View itemView) {
             super(itemView);
-            ButterKnife.bind(this, itemView);
+            try {
+                ButterKnife.bind(PopularMoviesGridViewHolder.this, itemView);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
 
             llMovieGrid.setOnClickListener(this);
         }
