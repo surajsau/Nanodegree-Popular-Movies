@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -11,6 +12,7 @@ import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -29,6 +31,7 @@ import in.surajsau.popularmovies.network.PopularMoviesClient;
 import in.surajsau.popularmovies.network.ServiceGenerator;
 import in.surajsau.popularmovies.network.models.MovieDetailsResponse;
 import in.surajsau.popularmovies.network.models.MovieImagesResponse;
+import me.zhanghai.android.materialprogressbar.MaterialProgressBar;
 import rx.Observable;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
@@ -42,6 +45,8 @@ public class MovieDetailsActivity extends AppCompatActivity implements View.OnCl
     private PopularMoviesClient client;
 
     @Bind(R.id.toolbar) Toolbar toolbar;
+    @Bind(R.id.cvMovieDetails) CardView cvMovieDetails;
+    @Bind(R.id.llMovieDetails) LinearLayout llMovieDetails;
     @Bind(R.id.ivMovieBackdrop) ImageView ivMovieBackdrop;
     @Bind(R.id.ivMoviePoster) ImageView ivMoviePoster;
     @Bind(R.id.tvReleaseDate) TextView tvReleaseDate;
@@ -49,6 +54,7 @@ public class MovieDetailsActivity extends AppCompatActivity implements View.OnCl
     @Bind(R.id.tvMovieSummary) TextView tvMovieSummary;
     @Bind(R.id.btnImdbLink) Button btnImdbLink;
     @Bind(R.id.rlMoviePosters) RecyclerView rlMoviePosters;
+    @Bind(R.id.progress) MaterialProgressBar progress;
 //    @Bind(R.id.rlMovieBackdrops) RecyclerView rlMovieBackdrops;
 
     private Subscription movieDetailsSubscription;
@@ -74,7 +80,7 @@ public class MovieDetailsActivity extends AppCompatActivity implements View.OnCl
         setupGallery();
 
         client = ServiceGenerator.createService(PopularMoviesClient.class);
-        callMovieDetailsAndImagesAPI();
+        callMovieDetailsAPI();
 
     }
 
@@ -119,17 +125,23 @@ public class MovieDetailsActivity extends AppCompatActivity implements View.OnCl
         }
     }
 
-    private void callMovieDetailsAndImagesAPI() {
-        final Observable<MovieDetailsResponse> movieDetailsResponse = client.getMovieDetails(mMovieId);
-        Observable<MovieImagesResponse> movieImagesResponse = client.getMovieImages(mMovieId);
+    private void callMovieDetailsAPI() {
+        showProgress();
+
+        Observable<MovieDetailsResponse> movieDetailsResponse = client.getMovieDetails(mMovieId);
 
         movieDetailsSubscription = movieDetailsResponse.subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new MovieDetailsSubscriber());
+    }
+
+    private void callMovieImagesAPI() {
+        Observable<MovieImagesResponse> movieImagesResponse = client.getMovieImages(mMovieId);
 
         moviePosterSubscription = movieImagesResponse.subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new MovieImageResponseSubscriber());
+
     }
 
     private class MovieDetailsSubscriber extends BaseSubscriber<MovieDetailsResponse> {
@@ -154,6 +166,18 @@ public class MovieDetailsActivity extends AppCompatActivity implements View.OnCl
         @Override
         public String getSubscriberName() {
             return "Movie Details";
+        }
+
+        @Override
+        public void onCompleted() {
+            super.onCompleted();
+
+            //--show the cards
+            hideProgress();
+            cvMovieDetails.setVisibility(View.VISIBLE);
+            llMovieDetails.setVisibility(View.VISIBLE);
+
+            callMovieImagesAPI();
         }
     }
 
@@ -244,4 +268,15 @@ public class MovieDetailsActivity extends AppCompatActivity implements View.OnCl
             Toast.makeText(this, "Cannot open link", Toast.LENGTH_SHORT).show();
         }
     }
+
+    private void showProgress() {
+        if(progress.getVisibility() == View.GONE)
+            progress.setVisibility(View.VISIBLE);
+    }
+
+    private void hideProgress() {
+        if(progress.getVisibility() == View.VISIBLE)
+            progress.setVisibility(View.GONE);
+    }
+
 }

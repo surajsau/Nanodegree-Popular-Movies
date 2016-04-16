@@ -1,6 +1,5 @@
 package in.surajsau.popularmovies.mainscreen.activity;
 
-import android.support.annotation.IntDef;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
@@ -14,13 +13,13 @@ import java.util.List;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
-import in.surajsau.popularmovies.IConstants;
 import in.surajsau.popularmovies.R;
 import in.surajsau.popularmovies.mainscreen.adapter.MoviesGridAdapter;
 import in.surajsau.popularmovies.network.BaseSubscriber;
 import in.surajsau.popularmovies.network.PopularMoviesClient;
 import in.surajsau.popularmovies.network.ServiceGenerator;
 import in.surajsau.popularmovies.network.models.PopularMoviesResponse;
+import me.zhanghai.android.materialprogressbar.MaterialProgressBar;
 import rx.Observable;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
@@ -39,6 +38,7 @@ public class MainActivity extends AppCompatActivity {
     private static final int RATING = 1;
 
     @Bind(R.id.rlMovieList) RecyclerView rlMovieList;
+    @Bind(R.id.progress) MaterialProgressBar progress;
 
     private MoviesGridAdapter mAdapter;
 
@@ -56,6 +56,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void callPopularMoviesAPI() {
+        showProgress();
+
         Observable<PopularMoviesResponse> popularMoviesResponse = client.getPopularMovies();
 
         movieListSubscription = popularMoviesResponse.subscribeOn(Schedulers.newThread())
@@ -64,6 +66,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void callTopRatedMoviesAPI() {
+        showProgress();
+
         Observable<PopularMoviesResponse> topRatedMoviesResponse = client.getTopRatedMovies();
 
         movieListSubscription = topRatedMoviesResponse.subscribeOn(Schedulers.newThread())
@@ -101,6 +105,12 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public String getSubscriberName() {
             return "Popular movies";
+        }
+
+        @Override
+        public void onCompleted() {
+            super.onCompleted();
+            hideProgress();
         }
     }
 
@@ -148,6 +158,16 @@ public class MainActivity extends AppCompatActivity {
         super.onDestroy();
         movieListSubscription.unsubscribe();
         movieDataBindingSubscription.unsubscribe();
+    }
+
+    private void showProgress() {
+        if(progress.getVisibility() == View.GONE)
+            progress.setVisibility(View.VISIBLE);
+    }
+
+    private void hideProgress() {
+        if(progress.getVisibility() == View.VISIBLE)
+            progress.setVisibility(View.GONE);
     }
 
 }
