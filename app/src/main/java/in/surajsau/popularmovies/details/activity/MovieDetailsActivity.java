@@ -19,8 +19,6 @@ import android.widget.Toast;
 
 import com.squareup.picasso.Picasso;
 
-import java.util.List;
-
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import in.surajsau.popularmovies.IConstants;
@@ -29,17 +27,8 @@ import in.surajsau.popularmovies.details.adapter.MovieImagesAdapter;
 import in.surajsau.popularmovies.Util;
 import in.surajsau.popularmovies.details.presenter.MovieDetailsPresenter;
 import in.surajsau.popularmovies.details.presenter.MovieDetailsPresenterImpl;
-import in.surajsau.popularmovies.network.BaseSubscriber;
-import in.surajsau.popularmovies.network.PopularMoviesClient;
-import in.surajsau.popularmovies.network.ServiceGenerator;
 import in.surajsau.popularmovies.network.models.MovieDetailsResponse;
-import in.surajsau.popularmovies.network.models.MovieImagesResponse;
 import me.zhanghai.android.materialprogressbar.MaterialProgressBar;
-import rx.Observable;
-import rx.Subscription;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Func1;
-import rx.schedulers.Schedulers;
 
 public class MovieDetailsActivity extends AppCompatActivity implements View.OnClickListener, MovieDetailsView{
 
@@ -128,11 +117,6 @@ public class MovieDetailsActivity extends AppCompatActivity implements View.OnCl
     @Override
     public MovieImagesAdapter getMoviePosterAdapter() {
         return mPosterAdapter;
-    }
-
-    @Override
-    public Context getContext() {
-        return MovieDetailsActivity.this;
     }
 
     @Override

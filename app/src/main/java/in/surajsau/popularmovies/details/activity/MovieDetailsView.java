@@ -12,8 +12,6 @@ import in.surajsau.popularmovies.network.models.MovieDetailsResponse;
 public interface MovieDetailsView extends BaseActivityView {
     MovieImagesAdapter getMoviePosterAdapter();
 
-    Context getContext();
-
     void loadMoviePosterImage(String posterUrl);
     void loadMovieBackdropImage(String backdropUrl);
 

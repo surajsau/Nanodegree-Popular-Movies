@@ -9,24 +9,13 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 
-import java.util.List;
-
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import in.surajsau.popularmovies.R;
 import in.surajsau.popularmovies.mainscreen.adapter.MoviesGridAdapter;
 import in.surajsau.popularmovies.mainscreen.presenter.MainScreenPresenter;
 import in.surajsau.popularmovies.mainscreen.presenter.MainScreenPresenterImpl;
-import in.surajsau.popularmovies.network.BaseSubscriber;
-import in.surajsau.popularmovies.network.PopularMoviesClient;
-import in.surajsau.popularmovies.network.ServiceGenerator;
-import in.surajsau.popularmovies.network.models.PopularMoviesResponse;
 import me.zhanghai.android.materialprogressbar.MaterialProgressBar;
-import rx.Observable;
-import rx.Subscription;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Func1;
-import rx.schedulers.Schedulers;
 
 public class MainActivity extends AppCompatActivity implements MainScreenView {
 
@@ -45,9 +34,9 @@ public class MainActivity extends AppCompatActivity implements MainScreenView {
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
 
-        presenter = new MainScreenPresenterImpl(this);
-
         setupRecyclerView();
+
+        presenter = new MainScreenPresenterImpl(this);
 
         //--load popular list by default
         presenter.callPopularMoviesAPI();

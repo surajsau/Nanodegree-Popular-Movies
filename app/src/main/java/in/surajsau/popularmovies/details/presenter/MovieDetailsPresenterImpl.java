@@ -1,16 +1,7 @@
 package in.surajsau.popularmovies.details.presenter;
 
-import android.content.Intent;
-import android.net.Uri;
-import android.text.TextUtils;
-import android.view.View;
-import android.widget.Toast;
-
-import com.squareup.picasso.Picasso;
-
 import java.util.List;
 
-import in.surajsau.popularmovies.Util;
 import in.surajsau.popularmovies.details.activity.MovieDetailsView;
 import in.surajsau.popularmovies.network.BaseSubscriber;
 import in.surajsau.popularmovies.network.PopularMoviesClient;
@@ -101,6 +92,7 @@ public class MovieDetailsPresenterImpl implements MovieDetailsPresenter {
 
             //--show the cards
             mView.hideProgress();
+            mView.onMovieDetailsResponseComplete();
 
             callMoviePostersAPI();
         }
