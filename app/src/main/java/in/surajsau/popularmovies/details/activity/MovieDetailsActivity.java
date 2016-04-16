@@ -1,28 +1,38 @@
 package in.surajsau.popularmovies.details.activity;
 
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.text.TextUtils;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.squareup.picasso.Picasso;
+
+import java.util.List;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import in.surajsau.popularmovies.IConstants;
 import in.surajsau.popularmovies.R;
-import in.surajsau.popularmovies.mainscreen.utils.Util;
+import in.surajsau.popularmovies.details.adapter.MovieImagesAdapter;
+import in.surajsau.popularmovies.Util;
 import in.surajsau.popularmovies.network.BaseSubscriber;
 import in.surajsau.popularmovies.network.PopularMoviesClient;
 import in.surajsau.popularmovies.network.ServiceGenerator;
 import in.surajsau.popularmovies.network.models.MovieDetailsResponse;
+import in.surajsau.popularmovies.network.models.MovieImagesResponse;
 import rx.Observable;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 
 public class MovieDetailsActivity extends AppCompatActivity implements View.OnClickListener{
@@ -32,15 +42,24 @@ public class MovieDetailsActivity extends AppCompatActivity implements View.OnCl
     private PopularMoviesClient client;
 
     @Bind(R.id.toolbar) Toolbar toolbar;
-    @Bind(R.id.btnShare) FloatingActionButton btnShare;
     @Bind(R.id.ivMovieBackdrop) ImageView ivMovieBackdrop;
     @Bind(R.id.ivMoviePoster) ImageView ivMoviePoster;
-    @Bind(R.id.tvMovieTitle) TextView tvMovieTitle;
+    @Bind(R.id.tvReleaseDate) TextView tvReleaseDate;
+    @Bind(R.id.tvVoteAverage) TextView tvVoteAverage;
+    @Bind(R.id.tvMovieSummary) TextView tvMovieSummary;
+    @Bind(R.id.btnImdbLink) Button btnImdbLink;
+    @Bind(R.id.rlMoviePosters) RecyclerView rlMoviePosters;
+//    @Bind(R.id.rlMovieBackdrops) RecyclerView rlMovieBackdrops;
 
-    Subscription movieDetailsSubscription;
+    private Subscription movieDetailsSubscription;
+    private Subscription moviePosterSubscription;
+
+    private MovieImagesAdapter mPosterAdapter;
+//    private MovieImagesAdapter mBackdropAdapter;
 
     private String mMovieTitle;
     private int mMovieId;
+    private String imdbUrl;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,8 +71,10 @@ public class MovieDetailsActivity extends AppCompatActivity implements View.OnCl
         setupToolbar();
         setOnClickListeners();
 
+        setupGallery();
+
         client = ServiceGenerator.createService(PopularMoviesClient.class);
-        callMovieDetailsAPI();
+        callMovieDetailsAndImagesAPI();
 
     }
 
@@ -71,25 +92,44 @@ public class MovieDetailsActivity extends AppCompatActivity implements View.OnCl
     }
 
     private void setOnClickListeners() {
-        btnShare.setOnClickListener(this);
+        btnImdbLink.setOnClickListener(this);
+    }
+
+    private void setupGallery() {
+        mPosterAdapter = new MovieImagesAdapter(this);
+//        mBackdropAdapter = new MovieImagesAdapter(this);
+
+        LinearLayoutManager llPostersManager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
+//        LinearLayoutManager llBackdropsManager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
+
+        rlMoviePosters.setLayoutManager(llPostersManager);
+//        rlMovieBackdrops.setLayoutManager(llBackdropsManager);
+
+        rlMoviePosters.setAdapter(mPosterAdapter);
+//        rlMovieBackdrops.setAdapter(mBackdropAdapter);
     }
 
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
-            case R.id.btnShare: {
-
+            case R.id.btnImdbLink: {
+                openImdbLink();
             }
             break;
         }
     }
 
-    private void callMovieDetailsAPI() {
-        Observable<MovieDetailsResponse> movieDetailsResponse = client.getMovieDetails(mMovieId);
+    private void callMovieDetailsAndImagesAPI() {
+        final Observable<MovieDetailsResponse> movieDetailsResponse = client.getMovieDetails(mMovieId);
+        Observable<MovieImagesResponse> movieImagesResponse = client.getMovieImages(mMovieId);
 
         movieDetailsSubscription = movieDetailsResponse.subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new MovieDetailsSubscriber());
+
+        moviePosterSubscription = movieImagesResponse.subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new MovieImageResponseSubscriber());
     }
 
     private class MovieDetailsSubscriber extends BaseSubscriber<MovieDetailsResponse> {
@@ -101,16 +141,107 @@ public class MovieDetailsActivity extends AppCompatActivity implements View.OnCl
                     .into(ivMovieBackdrop);
 
             Picasso.with(MovieDetailsActivity.this)
-                    .load(Util.getPosterImageUrl(movieDetailsResponse.getPoster_path()))
+                    .load(Util.getPosterImageUrlForDetails(movieDetailsResponse.getPoster_path()))
                     .into(ivMoviePoster);
 
-            tvMovieTitle.setText(Util.getValueOrNull(movieDetailsResponse.getTitle()));
+            tvReleaseDate.setText(movieDetailsResponse.getRelease_date());
+            tvVoteAverage.setText(movieDetailsResponse.getVote_average() + "");
+            tvMovieSummary.setText(movieDetailsResponse.getOverview());
+
+            imdbUrl = movieDetailsResponse.getImdb_id();
+        }
+
+        @Override
+        public String getSubscriberName() {
+            return "Movie Details";
         }
     }
+
+    private class MovieImageResponseSubscriber extends BaseSubscriber<MovieImagesResponse> {
+
+        @Override
+        public String getSubscriberName() {
+            return "Movie Image response";
+        }
+
+        @Override
+        public void onNext(MovieImagesResponse movieImagesResponse) {
+            Observable.just(movieImagesResponse.getPosters())
+                .flatMap(new Func1<List<MovieImagesResponse.Poster>, Observable<MovieImagesResponse.Poster>>() {
+                    @Override
+                    public Observable<MovieImagesResponse.Poster> call(List<MovieImagesResponse.Poster> posters) {
+                        return Observable.from(posters);
+                    }
+                })
+                .map(new Func1<MovieImagesResponse.Poster, String>() {
+                    @Override
+                    public String call(MovieImagesResponse.Poster poster) {
+                        if(poster != null)
+                            return poster.getFile_path();
+                        return null;
+                    }
+                })
+                .subscribe(new MoviePostersSubscriber());
+
+//            Observable.just(movieImagesResponse.getBackdrops())
+//                    .flatMap(new Func1<List<MovieImagesResponse.Backdrop>, Observable<MovieImagesResponse.Backdrop>>() {
+//                        @Override
+//                        public Observable<MovieImagesResponse.Backdrop> call(List<MovieImagesResponse.Backdrop> backdrops) {
+//                            return Observable.from(backdrops);
+//                        }
+//                    })
+//                    .map(new Func1<MovieImagesResponse.Backdrop, String>() {
+//                        @Override
+//                        public String call(MovieImagesResponse.Backdrop backdrop) {
+//                            if(backdrop != null)
+//                                return backdrop.getFile_path();
+//                            return null;
+//                        }
+//                    })
+//                    .subscribe(new MovieBackdropSubscriber());
+        }
+    }
+
+    private class MoviePostersSubscriber extends BaseSubscriber<String> {
+        @Override
+        public void onNext(String movieUrl) {
+            mPosterAdapter.addMoviePosterUrl(movieUrl);
+        }
+
+        @Override
+        public String getSubscriberName() {
+            return "Movie Posters";
+        }
+    }
+
+//    private class MovieBackdropSubscriber extends BaseSubscriber<String> {
+//        @Override
+//        public void onNext(String movieUrl) {
+//            mBackdropAdapter.addMoviePosterUrl(movieUrl);
+//        }
+//
+//        @Override
+//        public String getSubscriberName() {
+//            return "Movie Backdrop";
+//        }
+//    }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
         movieDetailsSubscription.unsubscribe();
+        moviePosterSubscription.unsubscribe();
+    }
+
+    private void openImdbLink() {
+        if(!TextUtils.isEmpty(imdbUrl)) {
+            try {
+                startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("imdb:///title/" + imdbUrl)));
+            } catch (Exception e) {
+                startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("http://www.imdb.com/title/" + imdbUrl)));
+            }
+        } else {
+            Toast.makeText(this, "Cannot open link", Toast.LENGTH_SHORT).show();
+        }
     }
 }

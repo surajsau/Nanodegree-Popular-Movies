@@ -1,6 +1,7 @@
 package in.surajsau.popularmovies.network;
 
 import in.surajsau.popularmovies.network.models.MovieDetailsResponse;
+import in.surajsau.popularmovies.network.models.MovieImagesResponse;
 import in.surajsau.popularmovies.network.models.PopularMoviesResponse;
 import retrofit2.Call;
 import retrofit2.http.GET;
@@ -17,4 +18,7 @@ public interface PopularMoviesClient {
 
     @GET("movie/{movieId}")
     Observable<MovieDetailsResponse> getMovieDetails(@Path("movieId") int movieId);
+
+    @GET("movie/{movieId}/images")
+    Observable<MovieImagesResponse> getMovieImages(@Path("movieId") int movieId);
 }

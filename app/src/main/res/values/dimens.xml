@@ -5,4 +5,8 @@
     <dimen name="app_bar_height">240dp</dimen>
     <dimen name="fab_margin">16dp</dimen>
     <dimen name="text_margin">16dp</dimen>
+    <dimen name="common_horizontal_padding">16dp</dimen>
+    <dimen name="common_vertical_padding">10dp</dimen>
+    <dimen name="header_text_size">18sp</dimen>
+    <dimen name="movie_details_card_height">140dp</dimen>
 </resources>

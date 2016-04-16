@@ -20,7 +20,7 @@ import butterknife.ButterKnife;
 import in.surajsau.popularmovies.IConstants;
 import in.surajsau.popularmovies.R;
 import in.surajsau.popularmovies.details.activity.MovieDetailsActivity;
-import in.surajsau.popularmovies.mainscreen.utils.Util;
+import in.surajsau.popularmovies.Util;
 import in.surajsau.popularmovies.network.models.PopularMoviesResponse;
 
 /**

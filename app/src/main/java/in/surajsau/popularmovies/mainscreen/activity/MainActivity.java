@@ -83,6 +83,10 @@ public class MainActivity extends AppCompatActivity {
                 populatePopularMoviesList(popularMoviesResponse.getResults());
         }
 
+        @Override
+        public String getSubscriberName() {
+            return "Popular movies";
+        }
     }
 
     private class MovieItemSubscriber extends BaseSubscriber<PopularMoviesResponse.Movie> {
@@ -91,6 +95,11 @@ public class MainActivity extends AppCompatActivity {
         public void onNext(PopularMoviesResponse.Movie movie) {
             if(movie != null)
                 mAdapter.addMovieToList(movie);
+        }
+
+        @Override
+        public String getSubscriberName() {
+            return "Movie Item";
         }
     }
 

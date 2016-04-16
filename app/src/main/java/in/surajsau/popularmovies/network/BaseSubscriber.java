@@ -11,12 +11,14 @@ public abstract class BaseSubscriber<T> extends Subscriber<T> {
 
     @Override
     public void onError(Throwable e) {
-        Log.d("Subscriber", e.getMessage());
+        Log.d("Subscriber " + getSubscriberName(), e.getMessage());
     }
 
     @Override
     public void onCompleted() {
-        Log.d("Subscriber", "Subscription completed");
+        Log.d("Subscriber " + getSubscriberName(), "Subscription completed");
     }
+
+    public abstract String getSubscriberName();
 
 }

@@ -5,6 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
+    android:background="@color/colorPrimaryLight"
     tools:context="in.surajsau.popularmovies.details.activity.MovieDetailsActivity">
 
     <android.support.design.widget.AppBarLayout
@@ -12,6 +13,7 @@
         android:layout_width="match_parent"
         android:layout_height="@dimen/app_bar_height"
         android:fitsSystemWindows="true"
+        app:elevation="0dp"
         android:theme="@style/AppTheme.AppBarOverlay">
 
         <android.support.design.widget.CollapsingToolbarLayout
@@ -20,7 +22,7 @@
             android:layout_height="match_parent"
             android:fitsSystemWindows="true"
             app:contentScrim="?attr/colorPrimary"
-            app:layout_scrollFlags="scroll|enterAlways">
+            app:layout_scrollFlags="scroll|exitUntilCollapsed">
 
             <ImageView android:id="@+id/ivMovieBackdrop"
                 android:layout_width="match_parent"
@@ -41,13 +43,14 @@
 
     <include layout="@layout/content_movie_details" />
 
-    <android.support.design.widget.FloatingActionButton
-        android:id="@+id/btnShare"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="@dimen/fab_margin"
-        android:src="@android:drawable/ic_dialog_email"
-        app:layout_anchor="@id/app_bar"
-        app:layout_anchorGravity="bottom|end" />
+    <include layout="@layout/movie_details_card_layout"/>
+    <!--<android.support.design.widget.FloatingActionButton-->
+        <!--android:id="@+id/btnShare"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_margin="@dimen/fab_margin"-->
+        <!--android:src="@android:drawable/ic_dialog_email"-->
+        <!--app:layout_anchor="@id/app_bar"-->
+        <!--app:layout_anchorGravity="bottom|end" />-->
 
 </android.support.design.widget.CoordinatorLayout>
