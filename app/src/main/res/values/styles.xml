@@ -17,6 +17,16 @@
 
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 
+    <style name="gridHeaderText">
+        <item name="android:textSize">20sp</item>
+        <item name="android:textColor">@color/colorTextHeaders</item>
+    </style>
+
+    <style name="gridContentText">
+        <item name="android:textSize">18sp</item>
+        <item name="android:textColor">@color/colorTextHeaders</item>
+    </style>
+
     <style name="headerText">
         <item name="android:textSize">18sp</item>
         <item name="android:textColor">@color/colorTextHeaders</item>
