@@ -16,6 +16,9 @@ public interface PopularMoviesClient {
     @GET("movie/popular")
     Observable<PopularMoviesResponse> getPopularMovies();
 
+    @GET("movie/top_rated")
+    Observable<PopularMoviesResponse> getTopRatedMovies();
+
     @GET("movie/{movieId}")
     Observable<MovieDetailsResponse> getMovieDetails(@Path("movieId") int movieId);
 

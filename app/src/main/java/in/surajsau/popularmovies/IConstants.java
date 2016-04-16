@@ -10,4 +10,6 @@ public interface IConstants {
 
     String MOVIE_TITLE = "movie_title";
     String MOVIE_ID = "movie_id";
+
+    String SORT_TYPE = "sort_type";
 }

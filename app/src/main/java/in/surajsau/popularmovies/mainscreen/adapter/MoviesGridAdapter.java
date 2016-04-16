@@ -26,18 +26,23 @@ import in.surajsau.popularmovies.network.models.PopularMoviesResponse;
 /**
  * Created by MacboolBro on 08/04/16.
  */
-public class PopularMoviesGridAdapter extends RecyclerView.Adapter<PopularMoviesGridAdapter.PopularMoviesGridViewHolder> {
+public class MoviesGridAdapter extends RecyclerView.Adapter<MoviesGridAdapter.PopularMoviesGridViewHolder> {
 
     private List<PopularMoviesResponse.Movie> mMovies;
     private Context mContext;
 
-    public PopularMoviesGridAdapter(Context context) {
+    public MoviesGridAdapter(Context context) {
         mContext = context;
         mMovies = new ArrayList<>();
     }
 
     public void addMovieToList(PopularMoviesResponse.Movie movie) {
         mMovies.add(movie);
+        notifyDataSetChanged();
+    }
+
+    public void clearMoviesList() {
+        mMovies.clear();
         notifyDataSetChanged();
     }
 

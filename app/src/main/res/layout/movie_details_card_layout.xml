@@ -14,13 +14,16 @@
         android:layout_height="match_parent"
         android:orientation="horizontal"
         android:background="@color/colorPrimary"
-        android:padding="10dp">
+        android:paddingTop="5dp"
+        android:paddingLeft="@dimen/common_horizontal_padding"
+        android:paddingRight="@dimen/common_horizontal_padding"
+        android:paddingBottom="5dp">
 
         <ImageView android:id="@+id/ivMoviePoster"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:scaleType="fitCenter"
-            android:elevation="3dp"/>
+            android:elevation="3dp"
+            android:scaleType="fitCenter"/>
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -32,19 +35,20 @@
                 android:layout_height="0dp"
                 android:layout_weight="1"
                 android:orientation="horizontal"
-                android:gravity="center_vertical">
+                android:layout_gravity="center_vertical">
 
                 <ImageView
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_height="match_parent"
                     android:src="@drawable/release_date"/>
 
                 <TextView android:id="@+id/tvReleaseDate"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
                     android:text="--"
                     android:textColor="@color/colorTextContent"
                     style="@style/headerText"
+                    android:gravity="center_vertical"
                     android:layout_marginLeft="5dp"/>
             </LinearLayout>
 
@@ -53,19 +57,21 @@
                 android:layout_height="0dp"
                 android:layout_weight="1"
                 android:orientation="horizontal"
-                android:gravity="center_vertical">
+                android:layout_gravity="center_vertical">
 
                 <ImageView
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_height="match_parent"
                     android:src="@drawable/rating"/>
 
                 <TextView android:id="@+id/tvVoteAverage"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    style="@style/headerText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:textSize="30sp"
                     android:textColor="@color/colorTextContent"
                     android:text="--"
+                    android:textStyle="bold"
+                    android:gravity="center_vertical"
                     android:layout_marginLeft="5dp"/>
 
             </LinearLayout>
@@ -76,6 +82,7 @@
                 android:layout_weight="1"
                 android:text="Open in IMDB"
                 android:textAllCaps="false"
+                android:layout_marginTop="5dp"
                 android:textColor="@color/colorTextContent"
                 android:background="@color/colorPrimaryLight"
                 android:layout_gravity="center_vertical"/>

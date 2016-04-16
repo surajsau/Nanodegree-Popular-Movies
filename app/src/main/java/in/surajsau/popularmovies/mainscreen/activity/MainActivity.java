@@ -1,18 +1,22 @@
 package in.surajsau.popularmovies.mainscreen.activity;
 
+import android.support.annotation.IntDef;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
 
 import java.util.List;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
+import in.surajsau.popularmovies.IConstants;
 import in.surajsau.popularmovies.R;
-import in.surajsau.popularmovies.mainscreen.adapter.PopularMoviesGridAdapter;
+import in.surajsau.popularmovies.mainscreen.adapter.MoviesGridAdapter;
 import in.surajsau.popularmovies.network.BaseSubscriber;
 import in.surajsau.popularmovies.network.PopularMoviesClient;
 import in.surajsau.popularmovies.network.ServiceGenerator;
@@ -31,9 +35,12 @@ public class MainActivity extends AppCompatActivity {
     private Subscription movieListSubscription;
     private Subscription movieDataBindingSubscription;
 
+    private static final int POPULARITY = 0;
+    private static final int RATING = 1;
+
     @Bind(R.id.rlMovieList) RecyclerView rlMovieList;
 
-    private PopularMoviesGridAdapter mAdapter;
+    private MoviesGridAdapter mAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,7 +60,15 @@ public class MainActivity extends AppCompatActivity {
 
         movieListSubscription = popularMoviesResponse.subscribeOn(Schedulers.newThread())
                             .observeOn(AndroidSchedulers.mainThread())
-                            .subscribe(new PopularMoviesResponseSubcriber());
+                            .subscribe(new MoviesResponseSubcriber());
+    }
+
+    private void callTopRatedMoviesAPI() {
+        Observable<PopularMoviesResponse> topRatedMoviesResponse = client.getTopRatedMovies();
+
+        movieListSubscription = topRatedMoviesResponse.subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new MoviesResponseSubcriber());
     }
 
     private void populatePopularMoviesList(List<PopularMoviesResponse.Movie> movies) {
@@ -70,12 +85,12 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setupRecyclerView() {
-        mAdapter = new PopularMoviesGridAdapter(this);
+        mAdapter = new MoviesGridAdapter(this);
         rlMovieList.setLayoutManager(new GridLayoutManager(this, 2));
         rlMovieList.setAdapter(mAdapter);
     }
 
-    private class PopularMoviesResponseSubcriber extends BaseSubscriber<PopularMoviesResponse> {
+    private class MoviesResponseSubcriber extends BaseSubscriber<PopularMoviesResponse> {
 
         @Override
         public void onNext(PopularMoviesResponse popularMoviesResponse) {
@@ -104,8 +119,28 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onPause() {
-        super.onPause();
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu_movie_list, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.menu_popularity: {
+                mAdapter.clearMoviesList();
+                callPopularMoviesAPI();
+                return true;
+            }
+
+            case R.id.menu_ratings: {
+                mAdapter.clearMoviesList();
+                callTopRatedMoviesAPI();
+                return true;
+            }
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     @Override
@@ -114,4 +149,5 @@ public class MainActivity extends AppCompatActivity {
         movieListSubscription.unsubscribe();
         movieDataBindingSubscription.unsubscribe();
     }
+
 }

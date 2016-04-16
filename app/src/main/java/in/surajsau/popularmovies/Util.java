@@ -10,7 +10,7 @@ public class Util {
     }
 
     public static String getPosterImageUrlForDetails(String posterImagePath) {
-        return "http://image.tmdb.org/t/p/w185/" + posterImagePath;
+        return "http://image.tmdb.org/t/p/w342/" + posterImagePath;
     }
 
     public static String getPosterImageUrlForGallery(String posterImagePath) {
