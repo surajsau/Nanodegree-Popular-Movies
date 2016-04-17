@@ -88,12 +88,7 @@ public class MainScreenPresenterImpl implements MainScreenPresenter {
     private void populatePopularMoviesList(List<PopularMoviesResponse.Movie> movies) {
 
         movieDataBindingSubscription = Observable.just(movies)
-                .flatMap(new Func1<List<PopularMoviesResponse.Movie>, Observable<PopularMoviesResponse.Movie>>() {
-                    @Override
-                    public Observable<PopularMoviesResponse.Movie> call(List<PopularMoviesResponse.Movie> movies) {
-                        return Observable.from(movies);
-                    }
-                })
+                .flatMap(Observable::from)
                 .subscribe(new MovieItemSubscriber());
 
     }

@@ -111,19 +111,11 @@ public class MovieDetailsPresenterImpl implements MovieDetailsPresenter {
         @Override
         public void onNext(MovieImagesResponse movieImagesResponse) {
             Observable.just(movieImagesResponse.getPosters())
-                    .flatMap(new Func1<List<MovieImagesResponse.Poster>, Observable<MovieImagesResponse.Poster>>() {
-                        @Override
-                        public Observable<MovieImagesResponse.Poster> call(List<MovieImagesResponse.Poster> posters) {
-                            return Observable.from(posters);
-                        }
-                    })
-                    .map(new Func1<MovieImagesResponse.Poster, String>() {
-                        @Override
-                        public String call(MovieImagesResponse.Poster poster) {
-                            if(poster != null)
-                                return poster.getFile_path();
-                            return null;
-                        }
+                    .flatMap(Observable::from)
+                    .map(poster -> {
+                        if(poster != null)
+                            return poster.getFile_path();
+                        return null;
                     })
                     .subscribe(new MoviePostersSubscriber());
 
