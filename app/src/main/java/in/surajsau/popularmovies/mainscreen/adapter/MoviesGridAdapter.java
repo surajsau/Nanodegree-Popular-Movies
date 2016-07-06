@@ -2,6 +2,7 @@ package in.surajsau.popularmovies.mainscreen.adapter;
 
 import android.content.Context;
 import android.content.Intent;
+import android.support.annotation.NonNull;
 import android.support.v7.widget.AppCompatImageView;
 import android.support.v7.widget.AppCompatTextView;
 import android.support.v7.widget.RecyclerView;
@@ -33,6 +34,8 @@ public class MoviesGridAdapter extends RecyclerView.Adapter<MoviesGridAdapter.Po
     private List<PopularMoviesResponse.Movie> mMovies;
     private Context mContext;
 
+    private OnMovieClickedListener mListener;
+
     public MoviesGridAdapter(Context context) {
         mContext = context;
         mMovies = new ArrayList<>();
@@ -41,6 +44,10 @@ public class MoviesGridAdapter extends RecyclerView.Adapter<MoviesGridAdapter.Po
     public void addMovieToList(PopularMoviesResponse.Movie movie) {
         mMovies.add(movie);
         notifyDataSetChanged();
+    }
+
+    public void setOnMovieClickListener(@NonNull OnMovieClickedListener listener) {
+        mListener = listener;
     }
 
     public void clearMoviesList() {
@@ -96,14 +103,11 @@ public class MoviesGridAdapter extends RecyclerView.Adapter<MoviesGridAdapter.Po
         @Override
         public void onClick(View v) {
             PopularMoviesResponse.Movie movie = (PopularMoviesResponse.Movie) v.getTag();
-            startMovieDetailsActivity(movie.getId(), movie.getTitle());
+            mListener.onContentClicked(movie.getId(), movie.getTitle());
         }
     }
 
-    private void startMovieDetailsActivity(int movieId, String movieTitle) {
-        Intent movieDetailsIntent = new Intent(mContext, MovieDetailsActivity.class);
-        movieDetailsIntent.putExtra(IConstants.MOVIE_TITLE, movieTitle);
-        movieDetailsIntent.putExtra(IConstants.MOVIE_ID, movieId);
-        mContext.startActivity(movieDetailsIntent);
+    public interface OnMovieClickedListener {
+        void onContentClicked(int movieId, String movieTitle);
     }
 }

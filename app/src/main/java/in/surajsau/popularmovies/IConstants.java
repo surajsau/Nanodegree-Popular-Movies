@@ -12,4 +12,7 @@ public interface IConstants {
     String MOVIE_ID = "movie_id";
 
     String SORT_TYPE = "sort_type";
+
+    String MOVIE_LIST_FRAGMENT = "movie_list_fragment";
+    String MOVIE_DETAILS_FRAGMENT = "movie_details_fragment";
 }

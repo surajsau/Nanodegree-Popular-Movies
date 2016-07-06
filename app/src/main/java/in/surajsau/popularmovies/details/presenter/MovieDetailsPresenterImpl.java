@@ -111,30 +111,22 @@ public class MovieDetailsPresenterImpl implements MovieDetailsPresenter {
         @Override
         public void onNext(MovieImagesResponse movieImagesResponse) {
             Observable.just(movieImagesResponse.getPosters())
-                    .flatMap(Observable::from)
-                    .map(poster -> {
-                        if(poster != null)
-                            return poster.getFile_path();
-                        return null;
+                    .flatMap(new Func1<List<MovieImagesResponse.Poster>, Observable<MovieImagesResponse.Poster>>() {
+                        @Override
+                        public Observable<MovieImagesResponse.Poster> call(List<MovieImagesResponse.Poster> posters) {
+                            return Observable.from(posters);
+                        }
+                    })
+                    .map(new Func1<MovieImagesResponse.Poster, String>() {
+                        @Override
+                        public String call(MovieImagesResponse.Poster poster) {
+                            if(poster != null)
+                                return poster.getFile_path();
+                            return null;
+                        }
                     })
                     .subscribe(new MoviePostersSubscriber());
 
-//            Observable.just(movieImagesResponse.getBackdrops())
-//                    .flatMap(new Func1<List<MovieImagesResponse.Backdrop>, Observable<MovieImagesResponse.Backdrop>>() {
-//                        @Override
-//                        public Observable<MovieImagesResponse.Backdrop> call(List<MovieImagesResponse.Backdrop> backdrops) {
-//                            return Observable.from(backdrops);
-//                        }
-//                    })
-//                    .map(new Func1<MovieImagesResponse.Backdrop, String>() {
-//                        @Override
-//                        public String call(MovieImagesResponse.Backdrop backdrop) {
-//                            if(backdrop != null)
-//                                return backdrop.getFile_path();
-//                            return null;
-//                        }
-//                    })
-//                    .subscribe(new MovieBackdropSubscriber());
         }
     }
 
@@ -149,17 +141,5 @@ public class MovieDetailsPresenterImpl implements MovieDetailsPresenter {
             return "Movie Posters";
         }
     }
-
-    //    private class MovieBackdropSubscriber extends BaseSubscriber<String> {
-//        @Override
-//        public void onNext(String movieUrl) {
-//            mBackdropAdapter.addMoviePosterUrl(movieUrl);
-//        }
-//
-//        @Override
-//        public String getSubscriberName() {
-//            return "Movie Backdrop";
-//        }
-//    }
 
 }

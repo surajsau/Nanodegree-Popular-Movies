@@ -3,12 +3,18 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
+    android:orientation="horizontal"
     tools:context=".mainscreen.activity.MainActivity"
     android:background="@color/colorPrimaryLight">
 
     <FrameLayout android:id="@+id/flMovieList"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
+        android:layout_weight="1"
+        android:layout_height="wrap_content"/>
+
+    <FrameLayout android:id="@+id/flMovieDetails"
+        android:layout_width="0dp"
+        android:layout_weight="1"
         android:layout_height="wrap_content"/>
 
 </LinearLayout>

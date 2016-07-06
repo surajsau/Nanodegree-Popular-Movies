@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatImageView;
 import android.support.v7.widget.AppCompatTextView;
@@ -28,52 +29,39 @@ import in.surajsau.popularmovies.IConstants;
 import in.surajsau.popularmovies.R;
 import in.surajsau.popularmovies.details.adapter.MovieImagesAdapter;
 import in.surajsau.popularmovies.Util;
+import in.surajsau.popularmovies.details.fragment.MovieDetailsFragment;
 import in.surajsau.popularmovies.details.presenter.MovieDetailsPresenter;
 import in.surajsau.popularmovies.details.presenter.MovieDetailsPresenterImpl;
 import in.surajsau.popularmovies.network.models.MovieDetailsResponse;
 import me.zhanghai.android.materialprogressbar.MaterialProgressBar;
 
-public class MovieDetailsActivity extends AppCompatActivity implements View.OnClickListener, MovieDetailsView{
+public class MovieDetailsActivity extends AppCompatActivity {
 
     private static final String TAG = MovieDetailsActivity.class.getSimpleName();
 
-    private MovieDetailsPresenter presenter;
-
-    @Bind(R.id.toolbar) Toolbar toolbar;
-    @Bind(R.id.cvMovieDetails) CardView cvMovieDetails;
-    @Bind(R.id.llMovieDetails) LinearLayout llMovieDetails;
-    @Bind(R.id.ivMovieBackdrop) ImageView ivMovieBackdrop;
-    @Bind(R.id.ivMoviePoster) AppCompatImageView ivMoviePoster;
-    @Bind(R.id.tvReleaseDate) AppCompatTextView tvReleaseDate;
-    @Bind(R.id.tvVoteAverage) AppCompatTextView tvVoteAverage;
-    @Bind(R.id.tvMovieSummary) AppCompatTextView tvMovieSummary;
-    @Bind(R.id.btnImdbLink) Button btnImdbLink;
-    @Bind(R.id.rlMoviePosters) RecyclerView rlMoviePosters;
-    @Bind(R.id.progress) MaterialProgressBar progress;
-//    @Bind(R.id.rlMovieBackdrops) RecyclerView rlMovieBackdrops;
-
-    private MovieImagesAdapter mPosterAdapter;
-//    private MovieImagesAdapter mBackdropAdapter;
+    private MovieDetailsFragment mFragment;
 
     private String mMovieTitle;
     private int mMovieId;
+
+    @Bind(R.id.toolbar) Toolbar toolbar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_movie_details);
         ButterKnife.bind(MovieDetailsActivity.this);
+
         getDataFromBundle();
 
-        presenter = new MovieDetailsPresenterImpl(this, mMovieId);
-
         setupToolbar();
-        setOnClickListeners();
 
-        setupGallery();
+    }
 
-        presenter.callMovieDetailsAPI();
-
+    @Override
+    protected void onPostCreate(@Nullable Bundle savedInstanceState) {
+        super.onPostCreate(savedInstanceState);
+        startMovieDetailsFragment();
     }
 
     private void getDataFromBundle() {
@@ -89,95 +77,17 @@ public class MovieDetailsActivity extends AppCompatActivity implements View.OnCl
         getSupportActionBar().setTitle(mMovieTitle);
     }
 
-    private void setOnClickListeners() {
-        btnImdbLink.setOnClickListener(this);
-    }
+    private void startMovieDetailsFragment() {
+        Bundle movieBundle = new Bundle();
+        movieBundle.putInt(IConstants.MOVIE_ID, mMovieId);
+        movieBundle.putString(IConstants.MOVIE_TITLE, mMovieTitle);
 
-    private void setupGallery() {
-        mPosterAdapter = new MovieImagesAdapter(this);
-//        mBackdropAdapter = new MovieImagesAdapter(this);
+        mFragment = new MovieDetailsFragment();
+        mFragment.setArguments(movieBundle);
 
-        LinearLayoutManager llPostersManager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
-//        LinearLayoutManager llBackdropsManager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
-
-        rlMoviePosters.setLayoutManager(llPostersManager);
-//        rlMovieBackdrops.setLayoutManager(llBackdropsManager);
-
-        rlMoviePosters.setAdapter(mPosterAdapter);
-//        rlMovieBackdrops.setAdapter(mBackdropAdapter);
-    }
-
-    @Override
-    public void onClick(View v) {
-        switch (v.getId()) {
-            case R.id.btnImdbLink: {
-                presenter.openImdbLink();
-            }
-            break;
-        }
-    }
-
-    @Override
-    public MovieImagesAdapter getMoviePosterAdapter() {
-        return mPosterAdapter;
-    }
-
-    @Override
-    public void loadMoviePosterImage(String posterUrl) {
-        Picasso.with(MovieDetailsActivity.this)
-                .load(Util.getPosterImageUrlForDetails(posterUrl))
-                .into(ivMoviePoster);
-    }
-
-    @Override
-    public void loadMovieBackdropImage(String backdropUrl) {
-        Picasso.with(MovieDetailsActivity.this)
-                .load(Util.getBackdropImageUrl(backdropUrl))
-                .into(ivMovieBackdrop);
-    }
-
-    @Override
-    public void populateDataFromResponse(MovieDetailsResponse res) {
-        tvReleaseDate.setText(res.getRelease_date());
-        tvVoteAverage.setText(res.getVote_average() + "");
-        tvMovieSummary.setText(res.getOverview());
-    }
-
-    @Override
-    public void onMovieDetailsResponseComplete() {
-        cvMovieDetails.setVisibility(View.VISIBLE);
-        llMovieDetails.setVisibility(View.VISIBLE);
-    }
-
-    @Override
-    public void openImdb(String imdbUrl) {
-        if(!TextUtils.isEmpty(imdbUrl)) {
-            try {
-                startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("imdb:///title/" + imdbUrl)));
-            } catch (Exception e) {
-                startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("http://www.imdb.com/title/" + imdbUrl)));
-            }
-        } else {
-            Toast.makeText(this, "Cannot open link", Toast.LENGTH_SHORT).show();
-        }
-    }
-
-    @Override
-    public void showProgress() {
-        if(progress.getVisibility() == View.GONE)
-            progress.setVisibility(View.VISIBLE);
-    }
-
-    @Override
-    public void hideProgress() {
-        if(progress.getVisibility() == View.VISIBLE)
-            progress.setVisibility(View.GONE);
-    }
-
-    @Override
-    protected void onDestroy() {
-        presenter.onDestroy();
-        super.onDestroy();
+        getSupportFragmentManager().beginTransaction()
+                .add(R.id.flMovieDetails, mFragment, IConstants.MOVIE_DETAILS_FRAGMENT)
+                .commit();
     }
 
 }

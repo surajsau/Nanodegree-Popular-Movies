@@ -24,4 +24,5 @@ public interface PopularMoviesClient {
 
     @GET("movie/{movieId}/images")
     Observable<MovieImagesResponse> getMovieImages(@Path("movieId") int movieId);
+
 }

@@ -1,5 +1,7 @@
 package in.surajsau.popularmovies.mainscreen.activity;
 
+import android.content.Intent;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
@@ -11,52 +13,37 @@ import android.view.View;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
+import in.surajsau.popularmovies.IConstants;
 import in.surajsau.popularmovies.R;
+import in.surajsau.popularmovies.details.activity.MovieDetailsActivity;
+import in.surajsau.popularmovies.details.fragment.MovieDetailsFragment;
 import in.surajsau.popularmovies.mainscreen.adapter.MoviesGridAdapter;
+import in.surajsau.popularmovies.mainscreen.fragment.MainFragment;
 import in.surajsau.popularmovies.mainscreen.presenter.MainScreenPresenter;
 import in.surajsau.popularmovies.mainscreen.presenter.MainScreenPresenterImpl;
 import me.zhanghai.android.materialprogressbar.MaterialProgressBar;
 
-public class MainActivity extends AppCompatActivity implements MainScreenView {
+public class MainActivity extends AppCompatActivity implements MainFragment.OnMovieClickedListener {
 
     private static final String TAG = MainActivity.class.getSimpleName();
 
-    private MainScreenPresenter presenter;
+    private boolean isTwoPaneLayout;
 
-    @Bind(R.id.rlMovieList) RecyclerView rlMovieList;
-    @Bind(R.id.progress) MaterialProgressBar progress;
-
-    private MoviesGridAdapter mAdapter;
+    private MainFragment mMainFragment;
+    private MovieDetailsFragment mDetailsFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        ButterKnife.bind(MainActivity.this);
 
-        setupRecyclerView();
-
-        presenter = new MainScreenPresenterImpl(this);
-
-        //--load popular list by default
-        presenter.callPopularMoviesAPI();
+        isTwoPaneLayout = (findViewById(R.id.flMovieDetails) != null);
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
-
-    }
-
-    private void setupRecyclerView() {
-        mAdapter = new MoviesGridAdapter(this);
-        rlMovieList.setLayoutManager(new GridLayoutManager(this, 2));
-        rlMovieList.setAdapter(mAdapter);
-    }
-
-    @Override
-    public MoviesGridAdapter getMovieGridAdapter() {
-        return mAdapter;
+    protected void onPostCreate(@Nullable Bundle savedInstanceState) {
+        super.onPostCreate(savedInstanceState);
+        showMovieListFragment();
     }
 
     @Override
@@ -68,36 +55,60 @@ public class MainActivity extends AppCompatActivity implements MainScreenView {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.menu_popularity: {
-                presenter.onPopularMenuSelected();
-            }
-            break;
+        if(mMainFragment != null) {
+            switch (item.getItemId()) {
+                case R.id.menu_popularity: {
+                    mMainFragment.onPopularMenuSelected();
+                }
+                break;
 
-            case R.id.menu_ratings: {
-                presenter.onRatingsMenuSelected();
+                case R.id.menu_ratings: {
+                    mMainFragment.onRatingsMenuSelected();
+                }
+                break;
             }
-            break;
         }
         return super.onOptionsItemSelected(item);
     }
 
-    @Override
-    protected void onDestroy() {
-        presenter.onDestroy();
-        super.onDestroy();
+    private void showMovieListFragment() {
+        if(mMainFragment == null) {
+            mMainFragment = new MainFragment();
+            mMainFragment.setOnMovieClickedListener(this);
+        }
+        getSupportFragmentManager().beginTransaction()
+                .replace(R.id.flMovieList, mMainFragment, IConstants.MOVIE_LIST_FRAGMENT)
+                .commit();
+    }
+
+    private void showDetailsFragment(int id, String title) {
+        Bundle movieBundle = new Bundle();
+        movieBundle.putInt(IConstants.MOVIE_ID, id);
+        movieBundle.putString(IConstants.MOVIE_TITLE, title);
+        if(mDetailsFragment == null) {
+            mDetailsFragment = new MovieDetailsFragment();
+        }
+
+        mDetailsFragment.setArguments(movieBundle);
+        getSupportFragmentManager().beginTransaction()
+                .remove(mDetailsFragment)
+                .add(R.id.flMovieDetails, mDetailsFragment, IConstants.MOVIE_DETAILS_FRAGMENT)
+                .commit();
     }
 
     @Override
-    public void showProgress() {
-        if(progress.getVisibility() == View.GONE)
-            progress.setVisibility(View.VISIBLE);
+    public void onMovieClicked(int id, String movieTitle) {
+        if(isTwoPaneLayout) {
+            showDetailsFragment(id, movieTitle);
+        } else {
+            startMovieDetailsActivity(id, movieTitle);
+        }
     }
 
-    @Override
-    public void hideProgress() {
-        if(progress.getVisibility() == View.VISIBLE)
-            progress.setVisibility(View.GONE);
+    private void startMovieDetailsActivity(int movieId, String movieTitle) {
+        Intent movieDetailsIntent = new Intent(this, MovieDetailsActivity.class);
+        movieDetailsIntent.putExtra(IConstants.MOVIE_TITLE, movieTitle);
+        movieDetailsIntent.putExtra(IConstants.MOVIE_ID, movieId);
+        startActivity(movieDetailsIntent);
     }
-
 }
