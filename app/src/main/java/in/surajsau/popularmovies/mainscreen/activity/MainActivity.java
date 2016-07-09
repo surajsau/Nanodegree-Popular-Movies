@@ -66,6 +66,11 @@ public class MainActivity extends AppCompatActivity implements MainFragment.OnMo
                     mMainFragment.onRatingsMenuSelected();
                 }
                 break;
+
+                case R.id.menu_favourites: {
+                    mMainFragment.onFavouritesMenuSelected();
+                }
+                break;
             }
         }
         return super.onOptionsItemSelected(item);
@@ -82,14 +87,7 @@ public class MainActivity extends AppCompatActivity implements MainFragment.OnMo
     }
 
     private void showDetailsFragment(int id, String title) {
-        Bundle movieBundle = new Bundle();
-        movieBundle.putInt(IConstants.MOVIE_ID, id);
-        movieBundle.putString(IConstants.MOVIE_TITLE, title);
-        if(mDetailsFragment == null) {
-            mDetailsFragment = new MovieDetailsFragment();
-        }
-
-        mDetailsFragment.setArguments(movieBundle);
+        mDetailsFragment = MovieDetailsFragment.getNewInstance(id, title);
         getSupportFragmentManager().beginTransaction()
                 .remove(mDetailsFragment)
                 .add(R.id.flMovieDetails, mDetailsFragment, IConstants.MOVIE_DETAILS_FRAGMENT)

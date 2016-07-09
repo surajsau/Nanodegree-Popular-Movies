@@ -2,10 +2,12 @@ package in.surajsau.popularmovies.details.fragment;
 
 
 import android.content.Intent;
+import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.AppCompatImageView;
 import android.support.v7.widget.AppCompatTextView;
 import android.support.v7.widget.CardView;
@@ -17,22 +19,30 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.FrameLayout;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
+import com.afollestad.materialdialogs.MaterialDialog;
 import com.squareup.picasso.Picasso;
+
+import java.util.ArrayList;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import in.surajsau.popularmovies.IConstants;
 import in.surajsau.popularmovies.R;
 import in.surajsau.popularmovies.Util;
+import in.surajsau.popularmovies.data.FavouritesDAO;
 import in.surajsau.popularmovies.details.activity.MovieDetailsView;
 import in.surajsau.popularmovies.details.adapter.MovieImagesAdapter;
+import in.surajsau.popularmovies.details.adapter.MovieReviewsAdapter;
 import in.surajsau.popularmovies.details.presenter.MovieDetailsPresenter;
 import in.surajsau.popularmovies.details.presenter.MovieDetailsPresenterImpl;
 import in.surajsau.popularmovies.network.models.MovieDetailsResponse;
+import in.surajsau.popularmovies.network.models.VideoResponse;
 import me.zhanghai.android.materialprogressbar.MaterialProgressBar;
 
 /**
@@ -48,6 +58,7 @@ public class MovieDetailsFragment extends Fragment implements MovieDetailsView, 
     private MovieDetailsPresenter presenter;
 
     private MovieImagesAdapter mPosterAdapter;
+    private MovieReviewsAdapter mReviewsAdapter;
 
 //    @Bind(R.id.toolbar) Toolbar toolbar;
     @Bind(R.id.cvMovieDetails) CardView cvMovieDetails;
@@ -58,11 +69,28 @@ public class MovieDetailsFragment extends Fragment implements MovieDetailsView, 
     @Bind(R.id.tvVoteAverage) AppCompatTextView tvVoteAverage;
     @Bind(R.id.tvMovieSummary) AppCompatTextView tvMovieSummary;
     @Bind(R.id.btnImdbLink) Button btnImdbLink;
+    @Bind(R.id.btnAddFavourites) Button btnAddFavourites;
+    @Bind(R.id.btnPlay) Button btnPlay;
     @Bind(R.id.rlMoviePosters) RecyclerView rlMoviePosters;
+    @Bind(R.id.rlMovieReviews) RecyclerView rlMovieReviews;
+    @Bind(R.id.flMovieReviews) FrameLayout flMovieReviews;
+    @Bind(R.id.btnShowReviews) Button btnShowReviews;
+    @Bind(R.id.reviewProgress) MaterialProgressBar reviewProgress;
     @Bind(R.id.progress) MaterialProgressBar progress;
 
     public MovieDetailsFragment() {
         // Required empty public constructor
+    }
+
+    public static MovieDetailsFragment getNewInstance(int movieId, String movieTitle) {
+        Bundle movieBundle = new Bundle();
+        movieBundle.putInt(IConstants.MOVIE_ID, movieId);
+        movieBundle.putString(IConstants.MOVIE_TITLE, movieTitle);
+
+        MovieDetailsFragment fragment = new MovieDetailsFragment();
+        fragment.setArguments(movieBundle);
+
+        return fragment;
     }
 
     @Override
@@ -77,12 +105,59 @@ public class MovieDetailsFragment extends Fragment implements MovieDetailsView, 
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         getDataFromArguments();
-        presenter = new MovieDetailsPresenterImpl(this, movieId);
+        presenter = new MovieDetailsPresenterImpl(this, movieId, new FavouritesDAO(getActivity()));
 
         setupClickListeners();
         setupGallery();
 
         presenter.callMovieDetailsAPI();
+        presenter.callMovieTrailersAPI();
+    }
+
+    @Override
+    public void onResume() {
+        presenter.initiateDao();
+        super.onResume();
+    }
+
+    @Override
+    public void onPause() {
+        presenter.closeDao();
+        super.onPause();
+    }
+
+    @Override
+    public void hidePlayTrailerButton() {
+        btnPlay.setVisibility(View.GONE);
+    }
+
+    @Override
+    public void startTrailerOnYoutube(String url) {
+        try {
+            Intent youtubeIntent = new Intent(Intent.ACTION_VIEW);
+            youtubeIntent.setData(Uri.parse(IConstants.BASE_YOUTUBE_APP_URL.concat(url)));
+            startActivity(youtubeIntent);
+        } catch (Exception e) {
+            Intent browserIntent = new Intent(Intent.ACTION_VIEW);
+            browserIntent.setData(Uri.parse(IConstants.BASE_YOUTUBE_URL.concat(url)));
+            startActivity(browserIntent);
+        }
+    }
+
+    @Override
+    public void showTrailerChooserDialog(final ArrayList<VideoResponse.Video> videos) {
+        MaterialDialog dlg = new MaterialDialog.Builder(getActivity())
+                .title("Choose trailer")
+                .items(videos)
+                .itemsCallbackSingleChoice(0, new MaterialDialog.ListCallbackSingleChoice() {
+                    @Override
+                    public boolean onSelection(MaterialDialog dialog, View itemView, int which, CharSequence text) {
+                        presenter.startTrailerFromChoice(videos.get(which).getKey());
+                        return true;
+                    }
+                })
+                .build();
+        dlg.show();
     }
 
     private void getDataFromArguments() {
@@ -94,21 +169,33 @@ public class MovieDetailsFragment extends Fragment implements MovieDetailsView, 
 
     private void setupClickListeners() {
         btnImdbLink.setOnClickListener(this);
+        btnAddFavourites.setOnClickListener(this);
+        btnShowReviews.setOnClickListener(this);
+        btnPlay.setOnClickListener(this);
     }
 
     private void setupGallery() {
         mPosterAdapter = new MovieImagesAdapter(getActivity());
+        mReviewsAdapter = new MovieReviewsAdapter(getActivity());
 
         LinearLayoutManager llPostersManager = new LinearLayoutManager(getActivity(), LinearLayoutManager.HORIZONTAL, false);
+        LinearLayoutManager llReviewsManager = new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false);
 
         rlMoviePosters.setLayoutManager(llPostersManager);
+        rlMovieReviews.setLayoutManager(llReviewsManager);
 
         rlMoviePosters.setAdapter(mPosterAdapter);
+        rlMovieReviews.setAdapter(mReviewsAdapter);
     }
 
     @Override
     public MovieImagesAdapter getMoviePosterAdapter() {
         return mPosterAdapter;
+    }
+
+    @Override
+    public MovieReviewsAdapter getMovieReviewAdapter() {
+        return mReviewsAdapter;
     }
 
     @Override
@@ -152,6 +239,19 @@ public class MovieDetailsFragment extends Fragment implements MovieDetailsView, 
     }
 
     @Override
+    public void updateFavouriteButton(boolean isFavourite) {
+        btnAddFavourites.setBackgroundColor(ContextCompat.getColor(getActivity(),
+                isFavourite ? R.color.colorAddedToFavourites:R.color.colorFavourites));
+        btnAddFavourites.setText(isFavourite ? "Favourite" : "Add to Favourites");
+    }
+
+    @Override
+    public void showOrHideReviews(boolean show) {
+        flMovieReviews.setVisibility(show ? View.VISIBLE : View.GONE);
+
+    }
+
+    @Override
     public void showProgress() {
         if(progress.getVisibility() == View.GONE)
             progress.setVisibility(View.VISIBLE);
@@ -164,10 +264,43 @@ public class MovieDetailsFragment extends Fragment implements MovieDetailsView, 
     }
 
     @Override
+    public void hideReviewsSpinner() {
+        if(reviewProgress.getVisibility() == View.VISIBLE)
+            reviewProgress.setVisibility(View.GONE);
+    }
+
+    @Override
+    public void showReviewSpinner() {
+        if(reviewProgress.getVisibility() == View.GONE)
+            reviewProgress.setVisibility(View.VISIBLE);
+    }
+
+    @Override
+    public void showReviews() {
+        if(rlMovieReviews.getVisibility() == View.GONE)
+            rlMovieReviews.setVisibility(View.VISIBLE);
+    }
+
+    @Override
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.btnImdbLink: {
                 presenter.openImdbLink();
+            }
+            break;
+
+            case R.id.btnAddFavourites: {
+                presenter.addMovieToFavourites();
+            }
+            break;
+
+            case R.id.btnShowReviews: {
+                presenter.showOrHideReviews(flMovieReviews.getVisibility() == View.GONE);
+            }
+            break;
+
+            case R.id.btnPlay: {
+                presenter.startTrailer();
             }
             break;
         }

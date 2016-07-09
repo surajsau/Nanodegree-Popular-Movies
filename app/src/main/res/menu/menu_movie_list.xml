@@ -7,4 +7,7 @@
     <item android:title="Sort by Ratings"
         android:id="@+id/menu_ratings"
         app:showAsAction="never"></item>
+    <item android:title="Favourites"
+        android:id="@+id/menu_favourites"
+        app:showAsAction="never"></item>
 </menu>

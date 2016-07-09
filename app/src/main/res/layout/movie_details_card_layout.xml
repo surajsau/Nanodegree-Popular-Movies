@@ -80,17 +80,39 @@
 
             </LinearLayout>
 
-            <android.support.v7.widget.AppCompatButton
-                android:id="@+id/btnImdbLink"
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="1"
-                android:text="Open in IMDB"
-                android:textAllCaps="false"
-                android:layout_marginTop="5dp"
-                android:textColor="@color/colorTextContent"
-                android:background="@color/colorPrimaryLight"
-                android:layout_gravity="center_vertical"/>
+                android:orientation="horizontal">
+
+                <android.support.v7.widget.AppCompatButton
+                    android:id="@+id/btnAddFavourites"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Add To Favourites"
+                    android:textAllCaps="false"
+                    android:layout_marginTop="5dp"
+                    android:textColor="@android:color/white"
+                    android:background="@color/colorFavourites"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginRight="2dp"/>
+
+                <android.support.v7.widget.AppCompatButton
+                    android:id="@+id/btnImdbLink"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Open in IMDB"
+                    android:textAllCaps="false"
+                    android:layout_marginTop="5dp"
+                    android:layout_marginLeft="2dp"
+                    android:textColor="@color/colorTextContent"
+                    android:background="@color/colorPrimaryLight"
+                    android:layout_gravity="center_vertical"/>
+
+            </LinearLayout>
 
         </LinearLayout>
 

@@ -6,4 +6,7 @@
     <color name="colorAccent">#607D8B</color>
     <color name="colorTextContent">#212121</color>
     <color name="colorTextHeaders">#727272</color>
+
+    <color name="colorFavourites">#e53935</color>
+    <color name="colorAddedToFavourites">#025622</color>
 </resources>

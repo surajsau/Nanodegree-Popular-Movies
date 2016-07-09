@@ -2,6 +2,7 @@ package in.surajsau.popularmovies.mainscreen.presenter;
 
 import java.util.List;
 
+import in.surajsau.popularmovies.data.FavouritesDAO;
 import in.surajsau.popularmovies.mainscreen.activity.MainScreenView;
 import in.surajsau.popularmovies.network.BaseSubscriber;
 import in.surajsau.popularmovies.network.PopularMoviesClient;
@@ -24,8 +25,11 @@ public class MainScreenPresenterImpl implements MainScreenPresenter {
     private Subscription movieListSubscription;
     private Subscription movieDataBindingSubscription;
 
-    public MainScreenPresenterImpl(MainScreenView view) {
+    private FavouritesDAO mDao;
+
+    public MainScreenPresenterImpl(MainScreenView view, FavouritesDAO dao) {
         mView = view;
+        mDao = dao;
         client = ServiceGenerator.createService(PopularMoviesClient.class);
     }
 
@@ -117,5 +121,21 @@ public class MainScreenPresenterImpl implements MainScreenPresenter {
     public void onRatingsMenuSelected() {
         mView.getMovieGridAdapter().clearMoviesList();
         callTopRatedMoviesAPI();
+    }
+
+    @Override
+    public void onFavouritesMenuSelected() {
+        mView.getMovieGridAdapter().clearMoviesList();
+        populatePopularMoviesList(mDao.getFavourites());
+    }
+
+    @Override
+    public void initiateDao() {
+        mDao.open();
+    }
+
+    @Override
+    public void closeDao() {
+        mDao.close();
     }
 }

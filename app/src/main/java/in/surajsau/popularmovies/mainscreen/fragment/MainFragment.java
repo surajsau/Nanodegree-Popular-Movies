@@ -13,7 +13,9 @@ import android.view.ViewGroup;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
+import in.surajsau.popularmovies.IConstants;
 import in.surajsau.popularmovies.R;
+import in.surajsau.popularmovies.data.FavouritesDAO;
 import in.surajsau.popularmovies.mainscreen.activity.MainScreenView;
 import in.surajsau.popularmovies.mainscreen.adapter.MoviesGridAdapter;
 import in.surajsau.popularmovies.mainscreen.presenter.MainScreenPresenter;
@@ -57,10 +59,22 @@ public class MainFragment extends Fragment implements MainScreenView, MoviesGrid
 
         setupRecyclerView();
 
-        presenter = new MainScreenPresenterImpl(this);
+        presenter = new MainScreenPresenterImpl(this, new FavouritesDAO(getActivity()));
 
         //--load popular list by default
         presenter.callPopularMoviesAPI();
+    }
+
+    @Override
+    public void onResume() {
+        presenter.initiateDao();
+        super.onResume();
+    }
+
+    @Override
+    public void onPause() {
+        presenter.closeDao();
+        super.onPause();
     }
 
     private void setupRecyclerView() {
@@ -103,5 +117,9 @@ public class MainFragment extends Fragment implements MainScreenView, MoviesGrid
 
     public void onRatingsMenuSelected() {
         presenter.onRatingsMenuSelected();
+    }
+
+    public void onFavouritesMenuSelected() {
+        presenter.onFavouritesMenuSelected();
     }
 }
