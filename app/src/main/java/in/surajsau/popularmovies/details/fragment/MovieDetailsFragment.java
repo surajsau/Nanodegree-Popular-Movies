@@ -145,10 +145,10 @@ public class MovieDetailsFragment extends Fragment implements MovieDetailsView, 
     }
 
     @Override
-    public void showTrailerChooserDialog(final ArrayList<VideoResponse.Video> videos) {
+    public void showTrailerChooserDialog(final ArrayList<VideoResponse.Video> videos, ArrayList<String> descriptions) {
         MaterialDialog dlg = new MaterialDialog.Builder(getActivity())
                 .title("Choose trailer")
-                .items(videos)
+                .items(descriptions)
                 .itemsCallbackSingleChoice(0, new MaterialDialog.ListCallbackSingleChoice() {
                     @Override
                     public boolean onSelection(MaterialDialog dialog, View itemView, int which, CharSequence text) {
@@ -213,7 +213,7 @@ public class MovieDetailsFragment extends Fragment implements MovieDetailsView, 
     }
 
     @Override
-    public void populateDataFromResponse(MovieDetailsResponse res) {
+    public void populateSummaryAndDatesFromResponse(MovieDetailsResponse res) {
         tvReleaseDate.setText(res.getRelease_date());
         tvVoteAverage.setText(res.getVote_average() + "");
         tvMovieSummary.setText(res.getOverview());

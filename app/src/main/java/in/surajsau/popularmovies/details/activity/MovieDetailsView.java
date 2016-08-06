@@ -20,7 +20,7 @@ public interface MovieDetailsView extends BaseActivityView {
     void loadMoviePosterImage(String posterUrl);
     void loadMovieBackdropImage(String backdropUrl);
 
-    void populateDataFromResponse(MovieDetailsResponse res);
+    void populateSummaryAndDatesFromResponse(MovieDetailsResponse res);
 
     void onMovieDetailsResponseComplete();
 
@@ -37,5 +37,5 @@ public interface MovieDetailsView extends BaseActivityView {
     void hidePlayTrailerButton();
 
     void startTrailerOnYoutube(String url);
-    void showTrailerChooserDialog(ArrayList<VideoResponse.Video> videos);
+    void showTrailerChooserDialog(ArrayList<VideoResponse.Video> videos, ArrayList<String> descriptions);
 }

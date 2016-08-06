@@ -1,8 +1,11 @@
 package in.surajsau.popularmovies.details.presenter;
 
+import android.os.Bundle;
+
 import java.util.ArrayList;
 import java.util.List;
 
+import in.surajsau.popularmovies.IConstants;
 import in.surajsau.popularmovies.data.FavouritesDAO;
 import in.surajsau.popularmovies.details.activity.MovieDetailsView;
 import in.surajsau.popularmovies.network.BaseSubscriber;
@@ -33,12 +36,15 @@ public class MovieDetailsPresenterImpl implements MovieDetailsPresenter {
     private Subscription movieReviewSubscription;
     private Subscription movieVideoSubscription;
 
+    private MovieDetailsResponse mDetails;
+
     private String imdbUrl;
     private int mMovieId;
 
     private FavouritesDAO mDao;
 
     private ArrayList<VideoResponse.Video> trailers;
+    private ArrayList<String> trailerDescriptions;
 
     private PopularMoviesResponse.Movie movie;
 
@@ -48,6 +54,7 @@ public class MovieDetailsPresenterImpl implements MovieDetailsPresenter {
         mDao = dao;
 
         trailers = new ArrayList<>();
+        trailerDescriptions = new ArrayList<>();
 
         client = ServiceGenerator.createService(PopularMoviesClient.class);
     }
@@ -70,7 +77,7 @@ public class MovieDetailsPresenterImpl implements MovieDetailsPresenter {
 
         movieVideoSubscription = videoResponse.subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe();
+                .subscribe(new MovieVideoResponseSubscriber());
     }
 
     @Override
@@ -136,11 +143,11 @@ public class MovieDetailsPresenterImpl implements MovieDetailsPresenter {
     @Override
     public void startTrailer() {
         if(trailers.size() > 1) {
-            mView.showTrailerChooserDialog(trailers);
+            mView.showTrailerChooserDialog(trailers, trailerDescriptions);
         } else if(trailers.size() == 1) {
             mView.startTrailerOnYoutube(trailers.get(0).getKey());
         } else {
-
+            mView.hidePlayTrailerButton();
         }
     }
 
@@ -164,21 +171,8 @@ public class MovieDetailsPresenterImpl implements MovieDetailsPresenter {
         @Override
         public void onNext(MovieDetailsResponse movieDetailsResponse) {
             if(movieDetailsResponse != null) {
-                mView.loadMovieBackdropImage(movieDetailsResponse.getBackdrop_path());
-                mView.loadMoviePosterImage(movieDetailsResponse.getPoster_path());
-
-                mView.populateDataFromResponse(movieDetailsResponse);
-
-                imdbUrl = movieDetailsResponse.getImdb_id();
-
-                movie = new PopularMoviesResponse.Movie();
-                movie.setId(movieDetailsResponse.getId());
-                movie.setTitle(movieDetailsResponse.getTitle());
-                movie.setVote_average(movieDetailsResponse.getVote_average());
-                movie.setPoster_path(movieDetailsResponse.getPoster_path());
-                movie.setPopularity(movieDetailsResponse.getPopularity());
-
-                mView.updateFavouriteButton(mDao.isMovieFavourite(movie.getId()));
+                mDetails = movieDetailsResponse;
+                populateDataIntoDetails(mDetails);
             }
         }
 
@@ -316,6 +310,7 @@ public class MovieDetailsPresenterImpl implements MovieDetailsPresenter {
         @Override
         public void onNext(VideoResponse.Video video) {
             trailers.add(video);
+            trailerDescriptions.add(video.getName());
         }
 
         @Override
@@ -323,6 +318,24 @@ public class MovieDetailsPresenterImpl implements MovieDetailsPresenter {
             if(trailers.isEmpty())
                 mView.hidePlayTrailerButton();
         }
+    }
+
+    private void populateDataIntoDetails(MovieDetailsResponse movieDetailsResponse) {
+        mView.loadMovieBackdropImage(movieDetailsResponse.getBackdrop_path());
+        mView.loadMoviePosterImage(movieDetailsResponse.getPoster_path());
+
+        mView.populateSummaryAndDatesFromResponse(movieDetailsResponse);
+
+        imdbUrl = movieDetailsResponse.getImdb_id();
+
+        movie = new PopularMoviesResponse.Movie();
+        movie.setId(movieDetailsResponse.getId());
+        movie.setTitle(movieDetailsResponse.getTitle());
+        movie.setVote_average(movieDetailsResponse.getVote_average());
+        movie.setPoster_path(movieDetailsResponse.getPoster_path());
+        movie.setPopularity(movieDetailsResponse.getPopularity());
+
+        mView.updateFavouriteButton(mDao.isMovieFavourite(movie.getId()));
     }
 
 }
