@@ -11,6 +11,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
+import java.util.ArrayList;
+
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import in.surajsau.popularmovies.IConstants;
@@ -20,6 +22,7 @@ import in.surajsau.popularmovies.mainscreen.activity.MainScreenView;
 import in.surajsau.popularmovies.mainscreen.adapter.MoviesGridAdapter;
 import in.surajsau.popularmovies.mainscreen.presenter.MainScreenPresenter;
 import in.surajsau.popularmovies.mainscreen.presenter.MainScreenPresenterImpl;
+import in.surajsau.popularmovies.network.models.PopularMoviesResponse;
 import me.zhanghai.android.materialprogressbar.MaterialProgressBar;
 
 public class MainFragment extends Fragment implements MainScreenView, MoviesGridAdapter.OnMovieClickedListener {
@@ -60,9 +63,14 @@ public class MainFragment extends Fragment implements MainScreenView, MoviesGrid
         setupRecyclerView();
 
         presenter = new MainScreenPresenterImpl(this, new FavouritesDAO(getActivity()));
+        presenter.initiateDao();
 
         //--load popular list by default
-        presenter.callPopularMoviesAPI();
+        if(savedInstanceState != null) {
+            presenter.reloadMovies(savedInstanceState.<PopularMoviesResponse.Movie>getParcelableArrayList(IConstants.CURRENT_MOVIES_LIST));
+        } else {
+            presenter.callPopularMoviesAPI();
+        }
     }
 
     @Override
@@ -86,11 +94,6 @@ public class MainFragment extends Fragment implements MainScreenView, MoviesGrid
     }
 
     @Override
-    public MoviesGridAdapter getMovieGridAdapter() {
-        return mAdapter;
-    }
-
-    @Override
     public void showProgress() {
         if(progress.getVisibility() == View.GONE)
             progress.setVisibility(View.VISIBLE);
@@ -105,6 +108,22 @@ public class MainFragment extends Fragment implements MainScreenView, MoviesGrid
     @Override
     public void onContentClicked(int movieId, String movieTitle) {
         mListener.onMovieClicked(movieId, movieTitle);
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putParcelableArrayList(IConstants.CURRENT_MOVIES_LIST, presenter.getCurrentMovieList());
+    }
+
+    @Override
+    public void clearMoviesList() {
+        mAdapter.clearMoviesList();
+    }
+
+    @Override
+    public void addMovieToList(PopularMoviesResponse.Movie movie) {
+        mAdapter.addMovieToList(movie);
     }
 
     public interface OnMovieClickedListener {

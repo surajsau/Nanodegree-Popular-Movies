@@ -82,11 +82,15 @@ public class MovieDetailsActivity extends AppCompatActivity {
         movieBundle.putInt(IConstants.MOVIE_ID, mMovieId);
         movieBundle.putString(IConstants.MOVIE_TITLE, mMovieTitle);
 
-        mFragment = new MovieDetailsFragment();
-        mFragment.setArguments(movieBundle);
+        mFragment = (MovieDetailsFragment) getSupportFragmentManager().findFragmentByTag(IConstants.MOVIE_DETAILS_FRAGMENT);
+
+        if(mFragment == null) {
+            mFragment = new MovieDetailsFragment();
+            mFragment.setArguments(movieBundle);
+        }
 
         getSupportFragmentManager().beginTransaction()
-                .add(R.id.flMovieDetails, mFragment, IConstants.MOVIE_DETAILS_FRAGMENT)
+                .replace(R.id.flMovieDetails, mFragment, IConstants.MOVIE_DETAILS_FRAGMENT)
                 .commit();
     }
 

@@ -1,12 +1,16 @@
 package in.surajsau.popularmovies.details.presenter;
 
 import in.surajsau.popularmovies.BaseActivityPresenter;
+import in.surajsau.popularmovies.network.models.MovieDetailsResponse;
 import in.surajsau.popularmovies.network.models.PopularMoviesResponse;
 
 /**
  * Created by MacboolBro on 16/04/16.
  */
 public interface MovieDetailsPresenter extends BaseActivityPresenter {
+    MovieDetailsResponse getCurrentMovieDetails();
+    void reloadMovieDetail(MovieDetailsResponse details);
+
     void callMovieTrailersAPI();
     void callMovieDetailsAPI();
     void callMoviePostersAPI();

@@ -25,7 +25,7 @@ import rx.schedulers.Schedulers;
 /**
  * Created by MacboolBro on 16/04/16.
  */
-public class MovieDetailsPresenterImpl implements MovieDetailsPresenter {
+public class MovieDetailsPresenterImpl implements MovieDetailsPresenter, FavouritesDAO.DBQueryListener {
 
     private MovieDetailsView mView;
 
@@ -48,6 +48,8 @@ public class MovieDetailsPresenterImpl implements MovieDetailsPresenter {
 
     private PopularMoviesResponse.Movie movie;
 
+    private boolean isMovieFavourite;
+
     public MovieDetailsPresenterImpl(MovieDetailsView view, int movieId, FavouritesDAO dao) {
         mView = view;
         mMovieId = movieId;
@@ -57,6 +59,8 @@ public class MovieDetailsPresenterImpl implements MovieDetailsPresenter {
         trailerDescriptions = new ArrayList<>();
 
         client = ServiceGenerator.createService(PopularMoviesClient.class);
+
+        mDao.setDBQueryListener(this);
     }
 
     @Override
@@ -69,6 +73,21 @@ public class MovieDetailsPresenterImpl implements MovieDetailsPresenter {
 
         if(movieReviewSubscription != null && !movieReviewSubscription.isUnsubscribed())
             movieReviewSubscription.unsubscribe();
+    }
+
+    @Override
+    public MovieDetailsResponse getCurrentMovieDetails() {
+        return mDetails;
+    }
+
+    @Override
+    public void reloadMovieDetail(MovieDetailsResponse details) {
+        mDetails = details;
+        populateDataIntoDetails(mDetails);
+        mView.hideProgress();
+        mView.onMovieDetailsResponseComplete();
+
+        callMoviePostersAPI();
     }
 
     @Override
@@ -117,14 +136,10 @@ public class MovieDetailsPresenterImpl implements MovieDetailsPresenter {
 
     @Override
     public void addMovieToFavourites() {
-        if(mDao.isMovieFavourite(movie.getId())) {
+        if(isMovieFavourite)
             mDao.removeFromFavourites(movie.getId());
-            mView.updateFavouriteButton(false);
-        }
-        else {
+        else
             mDao.addToFavourite(movie);
-            mView.updateFavouriteButton(true);
-        }
     }
 
     @Override
@@ -164,6 +179,27 @@ public class MovieDetailsPresenterImpl implements MovieDetailsPresenter {
     @Override
     public void closeDao() {
         mDao.close();
+    }
+
+    @Override
+    public void onFavouritesFoundListener(ArrayList<PopularMoviesResponse.Movie> favouriteMovies) {}
+
+    @Override
+    public void onMovieIsFoundInFavouritesListener(boolean isFavourite) {
+        isMovieFavourite = isFavourite;
+        mView.updateFavouriteButton(isFavourite);
+    }
+
+    @Override
+    public void onMovieAddedToFavouritesListener(boolean addingSuccess) {
+        mView.updateFavouriteButton(addingSuccess);
+        isMovieFavourite = addingSuccess ? true : false;
+    }
+
+    @Override
+    public void onMovieRemovedFromFavouritesListener(boolean removalSuccess) {
+        mView.updateFavouriteButton(!removalSuccess);
+        isMovieFavourite = removalSuccess ? false : true;
     }
 
     private class MovieDetailsSubscriber extends BaseSubscriber<MovieDetailsResponse> {
@@ -335,7 +371,7 @@ public class MovieDetailsPresenterImpl implements MovieDetailsPresenter {
         movie.setPoster_path(movieDetailsResponse.getPoster_path());
         movie.setPopularity(movieDetailsResponse.getPopularity());
 
-        mView.updateFavouriteButton(mDao.isMovieFavourite(movie.getId()));
+        mDao.checkIfMovieIsFavourite(movie.getId());
     }
 
 }

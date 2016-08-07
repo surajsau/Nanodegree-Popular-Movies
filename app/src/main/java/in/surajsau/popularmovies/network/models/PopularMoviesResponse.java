@@ -1,5 +1,8 @@
 package in.surajsau.popularmovies.network.models;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import java.util.List;
@@ -30,12 +33,34 @@ public class PopularMoviesResponse {
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
-    public static class Movie {
+    public static class Movie implements Parcelable{
         private String poster_path;
         private int id;
         private String title;
         private float popularity;
         private float vote_average;
+
+        public Movie() {}
+
+        protected Movie(Parcel in) {
+            poster_path = in.readString();
+            id = in.readInt();
+            title = in.readString();
+            popularity = in.readFloat();
+            vote_average = in.readFloat();
+        }
+
+        public static final Creator<Movie> CREATOR = new Creator<Movie>() {
+            @Override
+            public Movie createFromParcel(Parcel in) {
+                return new Movie(in);
+            }
+
+            @Override
+            public Movie[] newArray(int size) {
+                return new Movie[size];
+            }
+        };
 
         public String getPoster_path() {
             return poster_path;
@@ -75,6 +100,20 @@ public class PopularMoviesResponse {
 
         public void setVote_average(float vote_average) {
             this.vote_average = vote_average;
+        }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(Parcel parcel, int i) {
+            parcel.writeString(poster_path);
+            parcel.writeInt(id);
+            parcel.writeString(title);
+            parcel.writeFloat(popularity);
+            parcel.writeFloat(vote_average);
         }
     }
 }

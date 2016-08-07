@@ -1,5 +1,6 @@
 package in.surajsau.popularmovies.mainscreen.presenter;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import in.surajsau.popularmovies.data.FavouritesDAO;
@@ -17,7 +18,7 @@ import rx.schedulers.Schedulers;
 /**
  * Created by MacboolBro on 16/04/16.
  */
-public class MainScreenPresenterImpl implements MainScreenPresenter {
+public class MainScreenPresenterImpl implements MainScreenPresenter, FavouritesDAO.DBQueryListener {
 
     private MainScreenView mView;
     private PopularMoviesClient client;
@@ -27,10 +28,29 @@ public class MainScreenPresenterImpl implements MainScreenPresenter {
 
     private FavouritesDAO mDao;
 
+    private ArrayList<PopularMoviesResponse.Movie> mCurrentMoviesList;
+
     public MainScreenPresenterImpl(MainScreenView view, FavouritesDAO dao) {
         mView = view;
         mDao = dao;
         client = ServiceGenerator.createService(PopularMoviesClient.class);
+
+        mCurrentMoviesList = new ArrayList<>();
+
+        mDao.setDBQueryListener(this);
+    }
+
+    @Override
+    public ArrayList<PopularMoviesResponse.Movie> getCurrentMovieList() {
+        return mCurrentMoviesList;
+    }
+
+    @Override
+    public void reloadMovies(ArrayList<PopularMoviesResponse.Movie> movies) {
+        mCurrentMoviesList.clear();
+        mCurrentMoviesList.addAll(movies);
+
+        populatePopularMoviesList(movies);
     }
 
     @Override
@@ -55,12 +75,38 @@ public class MainScreenPresenterImpl implements MainScreenPresenter {
                 .subscribe(new MoviesResponseSubcriber());
     }
 
+    @Override
+    public void onFavouritesFoundListener(ArrayList<PopularMoviesResponse.Movie> favouriteMovies) {
+        mView.hideProgress();
+
+        mView.clearMoviesList();
+        populatePopularMoviesList(favouriteMovies);
+
+        mCurrentMoviesList.clear();
+        mCurrentMoviesList.addAll(favouriteMovies);
+    }
+
+    @Override
+    public void onMovieIsFoundInFavouritesListener(boolean isFavourite) {}
+
+    @Override
+    public void onMovieAddedToFavouritesListener(boolean success) {}
+
+    @Override
+    public void onMovieRemovedFromFavouritesListener(boolean success) {}
+
     private class MoviesResponseSubcriber extends BaseSubscriber<PopularMoviesResponse> {
 
         @Override
         public void onNext(PopularMoviesResponse popularMoviesResponse) {
-            if(popularMoviesResponse != null && popularMoviesResponse.getResults() != null)
+            if(popularMoviesResponse != null && popularMoviesResponse.getResults() != null) {
+
+                //--refresh current movies list
+                mCurrentMoviesList.clear();
+                mCurrentMoviesList.addAll(popularMoviesResponse.getResults());
+
                 populatePopularMoviesList(popularMoviesResponse.getResults());
+            }
         }
 
         @Override
@@ -80,7 +126,7 @@ public class MainScreenPresenterImpl implements MainScreenPresenter {
         @Override
         public void onNext(PopularMoviesResponse.Movie movie) {
             if(movie != null)
-                mView.getMovieGridAdapter().addMovieToList(movie);
+                mView.addMovieToList(movie);
         }
 
         @Override
@@ -113,20 +159,20 @@ public class MainScreenPresenterImpl implements MainScreenPresenter {
 
     @Override
     public void onPopularMenuSelected() {
-        mView.getMovieGridAdapter().clearMoviesList();
+        mView.clearMoviesList();
         callPopularMoviesAPI();
     }
 
     @Override
     public void onRatingsMenuSelected() {
-        mView.getMovieGridAdapter().clearMoviesList();
+        mView.clearMoviesList();
         callTopRatedMoviesAPI();
     }
 
     @Override
     public void onFavouritesMenuSelected() {
-        mView.getMovieGridAdapter().clearMoviesList();
-        populatePopularMoviesList(mDao.getFavourites());
+        mView.showProgress();
+        mDao.getFavourites();
     }
 
     @Override

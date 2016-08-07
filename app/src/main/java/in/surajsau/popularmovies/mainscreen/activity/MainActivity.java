@@ -77,20 +77,26 @@ public class MainActivity extends AppCompatActivity implements MainFragment.OnMo
     }
 
     private void showMovieListFragment() {
+        mMainFragment = (MainFragment) getSupportFragmentManager().findFragmentByTag(IConstants.MOVIE_LIST_FRAGMENT);
+
         if(mMainFragment == null) {
             mMainFragment = new MainFragment();
             mMainFragment.setOnMovieClickedListener(this);
         }
+
         getSupportFragmentManager().beginTransaction()
                 .replace(R.id.flMovieList, mMainFragment, IConstants.MOVIE_LIST_FRAGMENT)
                 .commit();
     }
 
     private void showDetailsFragment(int id, String title) {
-        mDetailsFragment = MovieDetailsFragment.getNewInstance(id, title);
+        mDetailsFragment = (MovieDetailsFragment) getSupportFragmentManager().findFragmentByTag(IConstants.MOVIE_DETAILS_FRAGMENT);
+
+        if(mDetailsFragment == null)
+            mDetailsFragment = MovieDetailsFragment.getNewInstance(id, title);
+
         getSupportFragmentManager().beginTransaction()
-                .remove(mDetailsFragment)
-                .add(R.id.flMovieDetails, mDetailsFragment, IConstants.MOVIE_DETAILS_FRAGMENT)
+                .replace(R.id.flMovieDetails, mDetailsFragment, IConstants.MOVIE_DETAILS_FRAGMENT)
                 .commit();
     }
 

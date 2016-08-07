@@ -107,11 +107,17 @@ public class MovieDetailsFragment extends Fragment implements MovieDetailsView, 
         getDataFromArguments();
         presenter = new MovieDetailsPresenterImpl(this, movieId, new FavouritesDAO(getActivity()));
 
+        presenter.initiateDao();
+
         setupClickListeners();
         setupGallery();
 
-        presenter.callMovieDetailsAPI();
-        presenter.callMovieTrailersAPI();
+        if(savedInstanceState != null) {
+            presenter.reloadMovieDetail((MovieDetailsResponse) savedInstanceState.getParcelable(IConstants.CURRENT_MOVIE_DETAILS));
+        } else {
+            presenter.callMovieDetailsAPI();
+            presenter.callMovieTrailersAPI();
+        }
     }
 
     @Override
@@ -304,5 +310,11 @@ public class MovieDetailsFragment extends Fragment implements MovieDetailsView, 
             }
             break;
         }
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putParcelable(IConstants.CURRENT_MOVIE_DETAILS, presenter.getCurrentMovieDetails());
     }
 }

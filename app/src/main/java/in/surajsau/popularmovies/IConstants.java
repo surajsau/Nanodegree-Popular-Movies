@@ -23,4 +23,7 @@ public interface IConstants {
     String BASE_YOUTUBE_URL = "https://www.youtube.com/watch?v=";
     String BASE_YOUTUBE_APP_URL = "vnd.youtube:";
 
+    String CURRENT_MOVIES_LIST = "current_movies_list";
+    String CURRENT_MOVIE_DETAILS = "current_movie_details";
+
 }
