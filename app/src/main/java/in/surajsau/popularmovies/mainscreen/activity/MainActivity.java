@@ -81,8 +81,9 @@ public class MainActivity extends AppCompatActivity implements MainFragment.OnMo
 
         if(mMainFragment == null) {
             mMainFragment = new MainFragment();
-            mMainFragment.setOnMovieClickedListener(this);
         }
+
+        mMainFragment.setOnMovieClickedListener(this);
 
         getSupportFragmentManager().beginTransaction()
                 .replace(R.id.flMovieList, mMainFragment, IConstants.MOVIE_LIST_FRAGMENT)
