@@ -14,7 +14,6 @@ public interface IConstants {
     String API_KEY_PARAM = "api_key";
     String API_KEY = "19eeb63c818d1da25b4cb4b46625da90";
 
-    String MOVIE_TITLE = "movie_title";
     String MOVIE_ID = "movie_id";
 
     String MOVIE_LIST_FRAGMENT = "movie_list_fragment";

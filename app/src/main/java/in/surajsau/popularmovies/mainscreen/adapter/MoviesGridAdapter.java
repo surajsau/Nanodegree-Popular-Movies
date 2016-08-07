@@ -103,11 +103,11 @@ public class MoviesGridAdapter extends RecyclerView.Adapter<MoviesGridAdapter.Po
         @Override
         public void onClick(View v) {
             PopularMoviesResponse.Movie movie = (PopularMoviesResponse.Movie) v.getTag();
-            mListener.onContentClicked(movie.getId(), movie.getTitle());
+            mListener.onContentClicked(movie.getId());
         }
     }
 
     public interface OnMovieClickedListener {
-        void onContentClicked(int movieId, String movieTitle);
+        void onContentClicked(int movieId);
     }
 }

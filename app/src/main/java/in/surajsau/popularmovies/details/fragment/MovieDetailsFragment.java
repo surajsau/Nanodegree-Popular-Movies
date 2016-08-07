@@ -53,9 +53,10 @@ public class MovieDetailsFragment extends Fragment implements MovieDetailsView, 
     private static final String TAG = MovieDetailsFragment.class.getSimpleName();
 
     private int movieId;
-    private String movieTitle;
 
     private MovieDetailsPresenter presenter;
+
+    private OnMovieTitleReceivedListener mTitleListener;
 
     private MovieImagesAdapter mPosterAdapter;
     private MovieReviewsAdapter mReviewsAdapter;
@@ -82,15 +83,18 @@ public class MovieDetailsFragment extends Fragment implements MovieDetailsView, 
         // Required empty public constructor
     }
 
-    public static MovieDetailsFragment getNewInstance(int movieId, String movieTitle) {
+    public static MovieDetailsFragment getNewInstance(int movieId) {
         Bundle movieBundle = new Bundle();
         movieBundle.putInt(IConstants.MOVIE_ID, movieId);
-        movieBundle.putString(IConstants.MOVIE_TITLE, movieTitle);
 
         MovieDetailsFragment fragment = new MovieDetailsFragment();
         fragment.setArguments(movieBundle);
 
         return fragment;
+    }
+
+    public void setTitleListener(OnMovieTitleReceivedListener listener) {
+        mTitleListener = listener;
     }
 
     @Override
@@ -118,6 +122,17 @@ public class MovieDetailsFragment extends Fragment implements MovieDetailsView, 
             presenter.callMovieDetailsAPI();
             presenter.callMovieTrailersAPI();
         }
+    }
+
+    public void loadNewMovieDetails(int movieId) {
+        this.movieId = movieId;
+        presenter.setMovieId(movieId);
+
+        presenter.callMovieDetailsAPI();
+        presenter.callMovieTrailersAPI();
+
+        refreshMoviePosters();
+        presenter.callMoviePostersAPI();
     }
 
     @Override
@@ -169,7 +184,6 @@ public class MovieDetailsFragment extends Fragment implements MovieDetailsView, 
     private void getDataFromArguments() {
         if(getArguments() != null) {
             movieId = getArguments().getInt(IConstants.MOVIE_ID);
-            movieTitle = getArguments().getString(IConstants.MOVIE_TITLE);
         }
     }
 
@@ -195,8 +209,12 @@ public class MovieDetailsFragment extends Fragment implements MovieDetailsView, 
     }
 
     @Override
-    public MovieImagesAdapter getMoviePosterAdapter() {
-        return mPosterAdapter;
+    public void addMoviePosterUrl(String url) {
+        mPosterAdapter.addMoviePosterUrl(url);
+    }
+
+    private void refreshMoviePosters() {
+        mPosterAdapter.refreshMoviePosters();
     }
 
     @Override
@@ -220,6 +238,9 @@ public class MovieDetailsFragment extends Fragment implements MovieDetailsView, 
 
     @Override
     public void populateSummaryAndDatesFromResponse(MovieDetailsResponse res) {
+        if(mTitleListener != null)
+            mTitleListener.onMovieTitleReceived(res.getTitle());
+
         tvReleaseDate.setText(res.getRelease_date());
         tvVoteAverage.setText(res.getVote_average() + "");
         tvMovieSummary.setText(res.getOverview());
@@ -316,5 +337,9 @@ public class MovieDetailsFragment extends Fragment implements MovieDetailsView, 
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putParcelable(IConstants.CURRENT_MOVIE_DETAILS, presenter.getCurrentMovieDetails());
+    }
+
+    public interface OnMovieTitleReceivedListener {
+        void onMovieTitleReceived(String title);
     }
 }

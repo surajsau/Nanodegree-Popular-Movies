@@ -106,8 +106,8 @@ public class MainFragment extends Fragment implements MainScreenView, MoviesGrid
     }
 
     @Override
-    public void onContentClicked(int movieId, String movieTitle) {
-        mListener.onMovieClicked(movieId, movieTitle);
+    public void onContentClicked(int movieId) {
+        mListener.onMovieClicked(movieId);
     }
 
     @Override
@@ -127,7 +127,7 @@ public class MainFragment extends Fragment implements MainScreenView, MoviesGrid
     }
 
     public interface OnMovieClickedListener {
-        void onMovieClicked(int id, String movieTitle);
+        void onMovieClicked(int id);
     }
 
     public void onPopularMenuSelected() {

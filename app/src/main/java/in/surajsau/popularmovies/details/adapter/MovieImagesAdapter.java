@@ -59,6 +59,10 @@ public class MovieImagesAdapter extends RecyclerView.Adapter<MovieImagesAdapter.
         }
     }
 
+    public void refreshMoviePosters() {
+        moviePosterUrls.clear();
+    }
+
     public class MovieImagesViewHolder extends RecyclerView.ViewHolder {
         @Bind(R.id.ivGalleryMoviePoster) AppCompatImageView ivGalleryMoviePoster;
 

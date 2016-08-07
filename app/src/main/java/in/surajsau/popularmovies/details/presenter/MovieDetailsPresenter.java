@@ -24,4 +24,6 @@ public interface MovieDetailsPresenter extends BaseActivityPresenter {
 
     void startTrailer();
     void startTrailerFromChoice(String url);
+
+    void setMovieId(int id);
 }

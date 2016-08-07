@@ -90,11 +90,14 @@ public class MainActivity extends AppCompatActivity implements MainFragment.OnMo
                 .commit();
     }
 
-    private void showDetailsFragment(int id, String title) {
+    private void showDetailsFragment(int id) {
         mDetailsFragment = (MovieDetailsFragment) getSupportFragmentManager().findFragmentByTag(IConstants.MOVIE_DETAILS_FRAGMENT);
 
-        if(mDetailsFragment == null)
-            mDetailsFragment = MovieDetailsFragment.getNewInstance(id, title);
+        if(mDetailsFragment == null) {
+            mDetailsFragment = MovieDetailsFragment.getNewInstance(id);
+        } else {
+            mDetailsFragment.loadNewMovieDetails(id);
+        }
 
         getSupportFragmentManager().beginTransaction()
                 .replace(R.id.flMovieDetails, mDetailsFragment, IConstants.MOVIE_DETAILS_FRAGMENT)
@@ -102,17 +105,16 @@ public class MainActivity extends AppCompatActivity implements MainFragment.OnMo
     }
 
     @Override
-    public void onMovieClicked(int id, String movieTitle) {
+    public void onMovieClicked(int id) {
         if(isTwoPaneLayout) {
-            showDetailsFragment(id, movieTitle);
+            showDetailsFragment(id);
         } else {
-            startMovieDetailsActivity(id, movieTitle);
+            startMovieDetailsActivity(id);
         }
     }
 
-    private void startMovieDetailsActivity(int movieId, String movieTitle) {
+    private void startMovieDetailsActivity(int movieId) {
         Intent movieDetailsIntent = new Intent(this, MovieDetailsActivity.class);
-        movieDetailsIntent.putExtra(IConstants.MOVIE_TITLE, movieTitle);
         movieDetailsIntent.putExtra(IConstants.MOVIE_ID, movieId);
         startActivity(movieDetailsIntent);
     }

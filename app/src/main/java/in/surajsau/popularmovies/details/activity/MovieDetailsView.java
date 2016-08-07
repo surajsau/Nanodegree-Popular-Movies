@@ -14,7 +14,8 @@ import in.surajsau.popularmovies.network.models.VideoResponse;
  * Created by MacboolBro on 16/04/16.
  */
 public interface MovieDetailsView extends BaseActivityView {
-    MovieImagesAdapter getMoviePosterAdapter();
+    void addMoviePosterUrl(String url);
+
     MovieReviewsAdapter getMovieReviewAdapter();
 
     void loadMoviePosterImage(String posterUrl);

@@ -64,6 +64,11 @@ public class MovieDetailsPresenterImpl implements MovieDetailsPresenter, Favouri
     }
 
     @Override
+    public void setMovieId(int id) {
+        mMovieId = id;
+    }
+
+    @Override
     public void onDestroy() {
         if(movieDetailsSubscription != null && !movieDetailsSubscription.isUnsubscribed())
             movieDetailsSubscription.unsubscribe();
@@ -307,7 +312,7 @@ public class MovieDetailsPresenterImpl implements MovieDetailsPresenter, Favouri
     private class MoviePostersSubscriber extends BaseSubscriber<String> {
         @Override
         public void onNext(String movieUrl) {
-            mView.getMoviePosterAdapter().addMoviePosterUrl(movieUrl);
+            mView.addMoviePosterUrl(movieUrl);
         }
 
         @Override

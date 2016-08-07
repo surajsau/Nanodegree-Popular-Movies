@@ -35,13 +35,12 @@ import in.surajsau.popularmovies.details.presenter.MovieDetailsPresenterImpl;
 import in.surajsau.popularmovies.network.models.MovieDetailsResponse;
 import me.zhanghai.android.materialprogressbar.MaterialProgressBar;
 
-public class MovieDetailsActivity extends AppCompatActivity {
+public class MovieDetailsActivity extends AppCompatActivity implements MovieDetailsFragment.OnMovieTitleReceivedListener{
 
     private static final String TAG = MovieDetailsActivity.class.getSimpleName();
 
     private MovieDetailsFragment mFragment;
 
-    private String mMovieTitle;
     private int mMovieId;
 
     @Bind(R.id.toolbar) Toolbar toolbar;
@@ -66,7 +65,6 @@ public class MovieDetailsActivity extends AppCompatActivity {
 
     private void getDataFromBundle() {
         if(getIntent() != null) {
-            mMovieTitle = getIntent().getStringExtra(IConstants.MOVIE_TITLE);
             mMovieId = getIntent().getIntExtra(IConstants.MOVIE_ID, -1);
         }
     }
@@ -74,13 +72,12 @@ public class MovieDetailsActivity extends AppCompatActivity {
     private void setupToolbar() {
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setTitle(mMovieTitle);
+        getSupportActionBar().setTitle("Movie Details...");
     }
 
     private void startMovieDetailsFragment() {
         Bundle movieBundle = new Bundle();
         movieBundle.putInt(IConstants.MOVIE_ID, mMovieId);
-        movieBundle.putString(IConstants.MOVIE_TITLE, mMovieTitle);
 
         mFragment = (MovieDetailsFragment) getSupportFragmentManager().findFragmentByTag(IConstants.MOVIE_DETAILS_FRAGMENT);
 
@@ -89,9 +86,15 @@ public class MovieDetailsActivity extends AppCompatActivity {
             mFragment.setArguments(movieBundle);
         }
 
+        mFragment.setTitleListener(this);
+
         getSupportFragmentManager().beginTransaction()
                 .replace(R.id.flMovieDetails, mFragment, IConstants.MOVIE_DETAILS_FRAGMENT)
                 .commit();
     }
 
+    @Override
+    public void onMovieTitleReceived(String title) {
+        getSupportActionBar().setTitle(title);
+    }
 }
